@@ -1,9 +1,6 @@
 import Providers from "@/components/providers";
-import { authVerifyToken } from "@/services/auth";
-import { TAuthIsLogin, TAuthUser } from "@/stores/auth";
 import { TConfig } from "@/stores/config";
 import "@/styles/globals.css";
-import { getSession } from "@/utils/session";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
@@ -31,32 +28,13 @@ export default async function RootLayout({
     title: metadata?.title,
     description: metadata?.description,
   };
-  const session = await getSession();
-
-  let isLogin: TAuthIsLogin = false;
-
-  if (session?.token) {
-    const response = await authVerifyToken(session?.token);
-
-    if (response) {
-      isLogin = true;
-    }
-  }
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers
-          config={config as TConfig}
-          auth={{
-            isLogin: isLogin,
-            user: session?.user as TAuthUser,
-          }}
-        >
-          {children}
-        </Providers>
+        <Providers config={config as TConfig}>{children}</Providers>
       </body>
     </html>
   );

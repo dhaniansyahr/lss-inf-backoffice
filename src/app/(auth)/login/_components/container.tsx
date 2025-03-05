@@ -35,7 +35,7 @@ export default function Container() {
 
   return (
     <section className="flex h-screen items-center justify-center">
-      <div className="w-full max-w-sm rounded-md border border-gray-100">
+      <div className="w-full max-w-sm rounded-md border border-black/25">
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-4 p-8">
             <div>
