@@ -17,6 +17,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Nodewave",
   description: "Node Solusi Indonesia",
+  openGraph: {
+    title: "",
+    description: "",
+    url: "",
+    images: [
+      {
+        url: "",
+        alt: "",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "",
+    description: "",
+    images: [""],
+  },
+  icons: {
+    icon: "",
+  },
 };
 
 export default async function RootLayout({
