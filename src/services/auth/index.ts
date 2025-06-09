@@ -1,6 +1,11 @@
 import type { TResponse } from "@/types/response";
 import { api, apiBase, getError } from "@/utils/api";
-import type { TLoginRequest, TLoginResponse, TVerifyResponse } from "./types";
+import type {
+  TLoginRequest,
+  TLoginResponse,
+  TVerifyRequest,
+  TVerifyResponse,
+} from "./types";
 
 export const authLogin = async (data: TLoginRequest) => {
   try {
@@ -9,21 +14,17 @@ export const authLogin = async (data: TLoginRequest) => {
       data,
     );
 
-    console.log(response.data);
-
     return response.data;
   } catch (error) {
     throw getError(error);
   }
 };
 
-export const authVerifyToken = async (token: string) => {
+export const authVerifyToken = async (data: TVerifyRequest) => {
   try {
     const response = await api.post<TResponse<TVerifyResponse>>(
       "/verify-token",
-      {
-        token,
-      },
+      data,
     );
 
     return response.data;

@@ -5,12 +5,7 @@ const requiredString = z.string().trim().min(1, "Required");
 
 export const env = createEnv({
   // Server environment variables configuration
-  server: {
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
-    AUTH_SECRET_KEY: requiredString,
-  },
+  server: {},
 
   // Client environment variables configuration
   client: {
@@ -20,8 +15,6 @@ export const env = createEnv({
 
   // Runtime environment variables captured from process.env
   runtimeEnv: {
-    AUTH_SECRET_KEY: process.env.AUTH_SECRET_KEY,
-    NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_FE_URL: process.env.NEXT_PUBLIC_FE_URL,
     NEXT_PUBLIC_BE_URL: process.env.NEXT_PUBLIC_BE_URL,
   },

@@ -8,13 +8,18 @@ type TProvidersProps = {
   children: React.ReactNode;
   auth: {
     isLogin: TAuthIsLogin;
-    user: TAuthUser;
+    accessToken: string;
+    user: TAuthUser | null;
   };
 };
 
 export default function Providers({ children, auth }: TProvidersProps) {
   return (
-    <AuthProvider isLogin={auth?.isLogin} user={auth?.user}>
+    <AuthProvider
+      isLogin={auth?.isLogin}
+      accessToken={auth?.accessToken}
+      user={auth?.user}
+    >
       {children}
     </AuthProvider>
   );

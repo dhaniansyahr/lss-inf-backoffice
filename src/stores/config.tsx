@@ -33,7 +33,7 @@ export function useConfig() {
     throw new Error("useConfig must be used within a ConfigProvider");
   }
 
-  return React.useContext(ConfigContext)!;
+  return React.useContext(ConfigContext)!();
 }
 
 type IConfigProviderProps = ICreateStoreParams & {
