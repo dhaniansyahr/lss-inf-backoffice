@@ -1,3 +1,4 @@
+import { TPaginationRequest } from "@/types/request";
 import { default as _axios, AxiosError } from "axios";
 import { getSession } from "./session";
 
@@ -36,4 +37,32 @@ export const getError = (error: AxiosError | unknown) => {
   }
 
   return { message: "Something went wrong" };
+};
+
+export const getParams = (params: TPaginationRequest) => {
+  const queryParams = new URLSearchParams();
+
+  if (params?.page) {
+    queryParams.append("page", params?.page.toString());
+  }
+  if (params?.rows) {
+    queryParams.append("rows", params?.rows.toString());
+  }
+  if (params?.searchFilters) {
+    queryParams.append("searchFilters", JSON.stringify(params.searchFilters));
+  }
+  if (params?.filters) {
+    queryParams.append("filters", JSON.stringify(params.filters));
+  }
+  if (params?.rangedFilters) {
+    queryParams.append("rangedFilters", JSON.stringify(params.rangedFilters));
+  }
+  if (params?.orderKey) {
+    queryParams.append("orderKey", params?.orderKey);
+  }
+  if (params?.orderRule) {
+    queryParams.append("orderRule", params?.orderRule);
+  }
+
+  return queryParams.toString();
 };
