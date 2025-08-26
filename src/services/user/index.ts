@@ -1,5 +1,5 @@
 import type { TResponse, TResponseGetAll } from "@/types/response";
-import { api, apiBase, getError } from "@/utils/api";
+import { api, apiBase, getError, getParams } from "@/utils/api";
 import type {
   TCreateUserRequest,
   TCreateUserResponse,
@@ -17,7 +17,9 @@ export const getAllUser = async (data: TGetAllUserRequest) => {
   try {
     const response = await apiBase.post<TResponseGetAll<TGetAllUserResponse>>(
       "/users",
-      data,
+      {
+        params: getParams(data),
+      },
     );
 
     return response.data;
