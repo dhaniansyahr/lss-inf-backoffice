@@ -2,67 +2,83 @@ import { TPaginationRequest } from "@/types/request";
 import { default as _axios, AxiosError } from "axios";
 import { getSession } from "./session";
 
+export const MULTIPART_HEADER = {
+    headers: {
+        "Content-Type": "multipart/form-data",
+    },
+};
+
+export const apiDefault = _axios.create({
+    baseURL: process.env.NEXT_PUBLIC_FE_URL,
+});
+
 export const apiBase = _axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BE_URL,
+    baseURL: process.env.NEXT_PUBLIC_BE_URL,
 });
 
 export const api = _axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BE_URL,
+    baseURL: process.env.NEXT_PUBLIC_BE_URL,
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = await getSession();
+    const token = await getSession();
 
-  config.headers.Authorization = `Bearer ${token?.token}`;
+    config.headers.Authorization = `Bearer ${token?.accessToken}`;
 
-  return config;
+    return config;
 });
 
 export const setToken = (token: string) => {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  api.interceptors.request.use((config) => {
-    config.headers.Authorization = `Bearer ${token}`;
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    api.interceptors.request.use((config) => {
+        config.headers.Authorization = `Bearer ${token}`;
 
-    return config;
-  });
+        return config;
+    });
 };
 
 export const getError = (error: AxiosError | unknown) => {
-  if (_axios.isAxiosError(error)) {
-    return {
-      content: error.response?.data?.content || null,
-      message: error.response?.data?.message || "Something went wrong",
-      errors: error.response?.data?.errors || [],
-    };
-  }
+    if (_axios.isAxiosError(error)) {
+        return {
+            content: error.response?.data?.content || null,
+            message: error.response?.data?.message || "Something went wrong",
+            errors: error.response?.data?.errors || [],
+        };
+    }
 
-  return { message: "Something went wrong" };
+    return { message: "Something went wrong" };
 };
 
 export const getParams = (params: TPaginationRequest) => {
-  const queryParams = new URLSearchParams();
+    const queryParams = new URLSearchParams();
 
-  if (params?.page) {
-    queryParams.append("page", params?.page.toString());
-  }
-  if (params?.rows) {
-    queryParams.append("rows", params?.rows.toString());
-  }
-  if (params?.searchFilters) {
-    queryParams.append("searchFilters", JSON.stringify(params.searchFilters));
-  }
-  if (params?.filters) {
-    queryParams.append("filters", JSON.stringify(params.filters));
-  }
-  if (params?.rangedFilters) {
-    queryParams.append("rangedFilters", JSON.stringify(params.rangedFilters));
-  }
-  if (params?.orderKey) {
-    queryParams.append("orderKey", params?.orderKey);
-  }
-  if (params?.orderRule) {
-    queryParams.append("orderRule", params?.orderRule);
-  }
+    if (params?.page) {
+        queryParams.append("page", params?.page.toString());
+    }
+    if (params?.rows) {
+        queryParams.append("rows", params?.rows.toString());
+    }
+    if (params?.searchFilters) {
+        queryParams.append(
+            "searchFilters",
+            JSON.stringify(params.searchFilters)
+        );
+    }
+    if (params?.filters) {
+        queryParams.append("filters", JSON.stringify(params.filters));
+    }
+    if (params?.rangedFilters) {
+        queryParams.append(
+            "rangedFilters",
+            JSON.stringify(params.rangedFilters)
+        );
+    }
+    if (params?.orderKey) {
+        queryParams.append("orderKey", params?.orderKey);
+    }
+    if (params?.orderRule) {
+        queryParams.append("orderRule", params?.orderRule);
+    }
 
-  return queryParams.toString();
+    return queryParams.toString();
 };
