@@ -32,6 +32,19 @@ const getAllFeatures = (params?: TQueryParams) => ({
     },
 });
 
+const getAvailableFeatures = (params?: TQueryParams) => ({
+    queryKey: QUERY_KEY({ ...params }),
+    queryFn: async () => {
+        try {
+            const response = await service.getAvailableFeatures();
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
 const getAccessByUserLevelId = (
     userLevelId: string,
     params?: TQueryParams
@@ -79,10 +92,28 @@ const update = (params?: TQueryParams) => ({
     },
 });
 
+const getAccessByFeatureName = (
+    featureName: string,
+    params?: TQueryParams
+) => ({
+    queryKey: QUERY_KEY({ ...params, featureName }),
+    queryFn: async () => {
+        try {
+            const response = await service.getAccessByFeatureName(featureName);
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
 export const roles = {
     getAll,
     getAllFeatures,
+    getAvailableFeatures,
     getAccessByUserLevelId,
     create,
     update,
+    getAccessByFeatureName,
 };

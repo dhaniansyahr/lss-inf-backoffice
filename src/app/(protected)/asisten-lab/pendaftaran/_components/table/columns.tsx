@@ -1,8 +1,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { TJadwal } from "@/types/data";
+import { TAccess, TJadwal } from "@/types/data";
 import { Button } from "@/components/ui/button";
 
 interface ICreateColumnsProps {
+    access: TAccess["actions"] | undefined | null;
     onRequest: (id: string) => void;
     currentPage?: number;
     pageSize?: number;
@@ -15,6 +16,7 @@ type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
 type ColumnType = TJadwal;
 
 export const createColumns = ({
+    access,
     onRequest,
     currentPage = 1,
     pageSize = 10,
@@ -102,9 +104,14 @@ export const createColumns = ({
         isCenter: true,
         cell: ({ row }) => {
             return (
-                <Button size={"sm"} onClick={() => onRequest(row.original.id)}>
-                    Daftar
-                </Button>
+                access?.CREATE && (
+                    <Button
+                        size={"sm"}
+                        onClick={() => onRequest(row.original.id)}
+                    >
+                        Daftar
+                    </Button>
+                )
             );
         },
         minSize: 150,

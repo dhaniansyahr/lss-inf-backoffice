@@ -10,6 +10,7 @@ import FormSection from "../form";
 import { TJadwalRequest, schema } from "@/services/jadwal/type";
 import { jadwalToValues } from "@/services/jadwal/dto";
 import { useQueryBuilder } from "@/hooks/use-query-builder";
+import { toast } from "sonner";
 
 interface IDialogEditProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -48,6 +49,9 @@ export default function DialogEdit(props: IDialogEditProps) {
                 queryClient.invalidateQueries({
                     queryKey: ["jadwal", props.id, params],
                 });
+            },
+            onError: (error) => {
+                toast.error(error.message);
             },
         });
     });

@@ -1,9 +1,9 @@
 import { stringifyParams } from "@/lib/query-params";
-import { TJadwal } from "@/types/data";
+import { TJadwal, TListParticipants, TMeeting } from "@/types/data";
 import { TQueryParams } from "@/types/request";
 import { TResponse, TResponseGetAll } from "@/types/response";
 import { api, MULTIPART_HEADER } from "@/utils/api";
-import { TJadwalRequest, TMeetingRequest } from "./type";
+import { TAbsentRequest, TJadwalRequest, TMeetingRequest } from "./type";
 
 export const api_service = {
     getAll: (params?: TQueryParams) => {
@@ -44,5 +44,27 @@ export const api_service = {
     },
     updateMeeting: (id: string, data: TMeetingRequest) => {
         return api.put<TResponse<TJadwal>>(`/jadwal/${id}/meeting`, data);
+    },
+    getListParticipants: (id: string) => {
+        return api.get<TResponse<TListParticipants>>(`/absensi/${id}/list`);
+    },
+    recordAbsent: (data: TAbsentRequest) => {
+        return api.post<TResponse<TMeeting>>(`/absensi/record`, data);
+    },
+    today: () => {
+        return api.get<TResponse<TMeeting[]>>(`/absensi/today`);
+    },
+    manualAssignMhs: (id: string, data: { mahasiswaIds: string[] }) => {
+        return api.put<TResponse<{}>>(
+            `/jadwal/assign-mahasiswa/${id}/manual`,
+            data
+        );
+    },
+    bulkAssignMhs: (id: string, data: { file: File }) => {
+        return api.put<TResponse<{}>>(
+            `/jadwal/assign-mahasiswa/${id}/bulk-upload`,
+            data,
+            MULTIPART_HEADER
+        );
     },
 };

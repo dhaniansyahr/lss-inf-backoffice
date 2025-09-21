@@ -16,7 +16,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/stores/auth";
 import { service } from "@/services";
 import { NavigationItem } from "@/constants/navigation";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 const getTitle = (pathname: string) => {
     for (const section of NavigationItem) {
@@ -43,9 +46,10 @@ const getTitle = (pathname: string) => {
 };
 
 export default function AppHeader() {
+    const router = useRouter();
     const pathname = usePathname();
 
-    const { user } = useAuth();
+    const { user, setIsLogin, setAccessToken } = useAuth();
 
     const getUserInitials = (email: string) => {
         return email
@@ -56,10 +60,22 @@ export default function AppHeader() {
             .slice(0, 2);
     };
 
-    const onLogout = () => {
-        service.auth.logout();
-    };
+    const onLogout = useMutation({
+        mutationKey: ["authLogout"],
+        mutationFn: service.auth.logout,
+        onSuccess: () => {
+            toast.success("Successfully logged out");
+            setIsLogin(false);
+            setAccessToken("");
 
+            setTimeout(() => {
+                router.push("/login");
+            }, 500);
+        },
+        onError: (error) => {
+            console.error("Logout failed:", error);
+        },
+    });
     return (
         <motion.header
             initial={{ opacity: 0, y: -20 }}
@@ -79,80 +95,6 @@ export default function AppHeader() {
 
                 {/* Right Section */}
                 <div className="flex items-center gap-2">
-                    {/* Notifications */}
-                    {/* <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.2 }}
-                    >
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="relative h-9 w-9"
-                                >
-                                    <Bell className="h-4 w-4" />
-                                    <Badge
-                                        variant="destructive"
-                                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
-                                    >
-                                        3
-                                    </Badge>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-80">
-                                <DropdownMenuLabel>
-                                    Notifications
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-                                    <div className="flex items-center gap-2 w-full">
-                                        <div className="h-2 w-2 bg-blue-500 rounded-full" />
-                                        <span className="text-sm font-medium">
-                                            New message
-                                        </span>
-                                        <span className="text-xs text-muted-foreground ml-auto">
-                                            2m ago
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        You have a new message from John Doe
-                                    </p>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-                                    <div className="flex items-center gap-2 w-full">
-                                        <div className="h-2 w-2 bg-green-500 rounded-full" />
-                                        <span className="text-sm font-medium">
-                                            System update
-                                        </span>
-                                        <span className="text-xs text-muted-foreground ml-auto">
-                                            1h ago
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        System has been updated successfully
-                                    </p>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-center">
-                                    View all notifications
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </motion.div> */}
-
-                    {/* Settings */}
-                    {/* <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.3 }}
-                    >
-                        <Button variant="ghost" size="icon" className="h-9 w-9">
-                            <Settings className="h-4 w-4" />
-                        </Button>
-                    </motion.div> */}
-
                     <div className="flex items-center gap-2">
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }}
@@ -193,8 +135,15 @@ export default function AppHeader() {
                                                 {user?.fullName || "User"}
                                             </p>
                                             <p className="text-xs leading-none text-muted-foreground">
-                                                {user?.email}
+                                                {user?.email ??
+                                                    user?.noIdentitas}
                                             </p>
+                                            <Badge
+                                                variant="secondary"
+                                                className="w-fit"
+                                            >
+                                                {user?.userLevel.name}
+                                            </Badge>
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
@@ -208,7 +157,7 @@ export default function AppHeader() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        onClick={onLogout}
+                                        onClick={() => onLogout.mutate()}
                                         className="text-red-600 focus:text-red-600"
                                     >
                                         <LogOut className="mr-2 h-4 w-4" />
@@ -217,15 +166,6 @@ export default function AppHeader() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </motion.div>
-
-                        <div className="hidden md:flex flex-col">
-                            <h1 className="font-bold text-sm">
-                                {user?.fullName ?? "Super Admin"}
-                            </h1>
-                            <h1 className="font-normal text-xs">
-                                {user?.email ?? "superadmin@example.com"}
-                            </h1>
-                        </div>
                     </div>
                 </div>
             </div>

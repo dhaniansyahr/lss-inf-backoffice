@@ -1,5 +1,5 @@
 import { stringifyParams } from "@/lib/query-params";
-import { TAllFeatures, TUserLevels } from "@/types/data";
+import { TAccess, TAllFeatures, TUserLevels } from "@/types/data";
 import { TQueryParams } from "@/types/request";
 import { TResponse, TResponseGetAll } from "@/types/response";
 import { api } from "@/utils/api";
@@ -22,5 +22,15 @@ export const service = {
     },
     update: (data: TAclRequest) => {
         return api.put<TResponse<TUserLevels>>(`/acl`, data);
+    },
+    getAvailableFeatures: () => {
+        return api.get<TResponse<string[]>>(`/acl/available-features`);
+    },
+    getAccessByFeatureName: (featureName: string) => {
+        return api.get<TResponse<TAccess>>(`/acl`, {
+            params: {
+                featureName,
+            },
+        });
     },
 };

@@ -44,11 +44,10 @@ const verifyToken = async (data: TVerifyRequest) => {
 
 const logout = async () => {
     try {
-        const response = await apiDefault.get(routes.logout);
+        const response = await apiDefault.get("/api/logout");
 
         return response.data;
     } catch (error) {
-        console.log(error);
         throw getError(error);
     }
 };

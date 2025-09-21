@@ -7,7 +7,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "./_components/app-sidebar";
 import AppHeader from "./_components/app-header";
 import { service } from "@/services";
-import { routes } from "@/services/auth/api-route";
 
 type TLayoutProps = {
     children: React.ReactNode;
@@ -25,20 +24,15 @@ export default async function Layout({ children }: TLayoutProps) {
         await service.auth
             .verifyToken({ token: session?.accessToken })
             .then((response) => {
-                const userResponse = response.content?.user ?? {};
-
                 isLogin = true;
 
-                const hasUser = Object.values(userResponse).some(
-                    (value) => value !== undefined && value !== null
-                );
-
-                user = hasUser ? (userResponse as TAuthUser) : null;
+                user = response?.content?.user?.id
+                    ? response?.content?.user
+                    : null;
             })
             .catch(() => {
                 isLogin = false;
                 user = null;
-                redirect(routes.logout);
             });
     }
 
@@ -51,7 +45,7 @@ export default async function Layout({ children }: TLayoutProps) {
             auth={{
                 isLogin: isLogin,
                 accessToken: session?.accessToken,
-                user: user,
+                user: session?.user,
             }}
         >
             <SidebarProvider>

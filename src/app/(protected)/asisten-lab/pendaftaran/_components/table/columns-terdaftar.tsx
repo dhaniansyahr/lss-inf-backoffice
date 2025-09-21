@@ -1,8 +1,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { TpendaftaranAsistenLab } from "@/types/data";
+import { TAccess, TpendaftaranAsistenLab } from "@/types/data";
 import { Button } from "@/components/ui/button";
 
 interface ICreateColumnsProps {
+    access: TAccess["actions"] | undefined | null;
     onUpdate: (v: TpendaftaranAsistenLab | null) => void;
     currentPage?: number;
     pageSize?: number;
@@ -15,6 +16,7 @@ type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
 type ColumnType = TpendaftaranAsistenLab;
 
 export const createColumnsRegistered = ({
+    access,
     onUpdate,
     currentPage = 1,
     pageSize = 10,
@@ -74,9 +76,11 @@ export const createColumnsRegistered = ({
         isCenter: true,
         cell: ({ row }) => {
             return (
-                <Button size={"sm"} onClick={() => onUpdate(row.original)}>
-                    Update
-                </Button>
+                access?.UPDATE && (
+                    <Button size={"sm"} onClick={() => onUpdate(row.original)}>
+                        Update
+                    </Button>
+                )
             );
         },
         minSize: 150,

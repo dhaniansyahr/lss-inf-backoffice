@@ -1,7 +1,7 @@
 import { getError } from "@/utils/api";
 import { TQueryParams } from "@/types/request";
 import { api_service } from "./service.api";
-import { TJadwalRequest, TMeetingRequest } from "./type";
+import { TAbsentRequest, TJadwalRequest, TMeetingRequest } from "./type";
 
 const QUERY_KEY = (key?: string | TQueryParams | Record<string, unknown>) =>
     ["jadwal", key] as const;
@@ -154,7 +154,83 @@ const updateMeeting = (id: string) => ({
     },
 });
 
+const getListParticipants = (id: string) => ({
+    queryKey: QUERY_KEY({ id }),
+    queryFn: async () => {
+        try {
+            const response = await api_service.getListParticipants(id);
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
+const recordAbsent = () => ({
+    mutationFn: async (data: TAbsentRequest) => {
+        try {
+            const response = await api_service.recordAbsent(data);
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+    meta: {
+        messages: {
+            success: "Berhasil Menyimpan Absensi pada jadwal!",
+            error: "Gagal Menyimpan Absensi pada jadwal!",
+        },
+    },
+});
+
+const manualAssignMhs = () => ({
+    mutationFn: async ({
+        id,
+        data,
+    }: {
+        id: string;
+        data: { mahasiswaIds: string[] };
+    }) => {
+        try {
+            const response = await api_service.manualAssignMhs(id, data);
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
+const bulkAssignMhs = () => ({
+    mutationFn: async ({ id, data }: { id: string; data: { file: File } }) => {
+        try {
+            const response = await api_service.bulkAssignMhs(id, data);
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
+const today = (params?: TQueryParams) => ({
+    queryKey: QUERY_KEY({ ...params }),
+    queryFn: async () => {
+        try {
+            const response = await api_service.today();
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
 export const jadwal = {
+    queryKey: (key?: string | TQueryParams | Record<string, unknown>) =>
+        QUERY_KEY(key),
     getAll,
     getOne,
     create,
@@ -164,4 +240,9 @@ export const jadwal = {
     bulkUpload,
     generate,
     updateMeeting,
+    getListParticipants,
+    recordAbsent,
+    today,
+    manualAssignMhs,
+    bulkAssignMhs,
 };

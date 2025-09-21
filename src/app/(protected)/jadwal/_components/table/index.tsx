@@ -13,8 +13,12 @@ import { IDialogsRef } from "../dialogs";
 import { useQuery } from "@tanstack/react-query";
 import DialogJadwal from "../dialogs";
 import { useRouter } from "next/navigation";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TableJadwal() {
+    const { access } = useAccess(ACCESS.JADWAL);
+
     const router = useRouter();
 
     const { params, updateParams } = useQueryBuilder();
@@ -22,11 +26,13 @@ export default function TableJadwal() {
     const dialogRef = useRef<IDialogsRef>(null);
 
     const columns = createColumns({
+        access,
         onDetail: (id: string) => router.push(`/jadwal/${id}/detail`),
         onAbsensi: (id: string) => router.push(`/jadwal/${id}/absensi`),
         onEditPertemuan: (id: string) =>
             dialogRef.current?.openDialogEditPertemuan(id),
         onEdit: (id: string) => dialogRef.current?.openDialogEdit(id),
+        onAssignMhs: (id: string) => dialogRef.current?.openDialogAssingMhs(id),
     });
 
     const { data, isLoading } = useQuery(
@@ -65,7 +71,7 @@ export default function TableJadwal() {
                     "Cari jadwal berdasarkan nama matakuliah, kode, hari, kelas, waktu, dan ruangan",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => dialogRef.current?.openDialogAdd()}

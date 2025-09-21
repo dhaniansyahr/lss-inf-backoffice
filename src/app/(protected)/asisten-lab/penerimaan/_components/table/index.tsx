@@ -10,13 +10,18 @@ import { DataTable } from "@/components/shared/data-table";
 import { IDialogsRef } from "../dialogs";
 import { useQuery } from "@tanstack/react-query";
 import DialogJadwal from "../dialogs";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TablePenerimaanAsistenLab() {
+    const { access } = useAccess(ACCESS.ASISTEN_LAB);
+
     const { params, updateParams } = useQueryBuilder();
 
     const dialogRef = useRef<IDialogsRef>(null);
 
     const columns = createColumns({
+        access,
         onEdit: (id: string) => dialogRef.current?.openDialogEdit(id),
         onDelete: (id: string) => dialogRef.current?.openDialogDelete(id),
     });

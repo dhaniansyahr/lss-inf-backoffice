@@ -3,6 +3,7 @@ export interface IMenuItem {
     url?: string;
     type: "LINK" | "SEPERATOR" | "HEADER";
     icon?: string;
+    subject?: string;
     items?: IMenuItem[];
 }
 

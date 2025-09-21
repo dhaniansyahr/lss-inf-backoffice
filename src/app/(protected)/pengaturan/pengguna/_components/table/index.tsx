@@ -12,13 +12,18 @@ import { useCallback, useRef } from "react";
 import { debounce } from "lodash";
 import { IDialogsRef } from "../dialogs";
 import DialogPengguna from "../dialogs";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TableUsers() {
+    const { access } = useAccess(ACCESS.USER_MANAGEMENT);
+
     const { params, updateParams } = useQueryBuilder();
 
     const dialogsRef = useRef<IDialogsRef>(null);
 
     const columns = createColumns({
+        access,
         onEdit: (id: string) => {
             dialogsRef.current?.openDialogEdit(id);
         },
@@ -59,7 +64,7 @@ export default function TableUsers() {
                 placeholder: "Cari pengguna berdasarkan nama, email, dan role",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => dialogsRef.current?.openDialogAdd()}

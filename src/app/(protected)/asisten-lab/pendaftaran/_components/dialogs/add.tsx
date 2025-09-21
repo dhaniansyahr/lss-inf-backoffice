@@ -32,7 +32,13 @@ export default function DialogAdd(props: IDialogAddProps) {
             nilaiTeori: "",
             nilaiPraktikum: "",
             nilaiAkhir: "",
-            keterangan: "",
+        },
+        values: {
+            jadwalId: props.jadwalId,
+            mahasiswaId: user?.id ?? "",
+            nilaiTeori: "",
+            nilaiPraktikum: "",
+            nilaiAkhir: "",
         },
         resolver: zodResolver(schema.request),
     });
@@ -46,12 +52,18 @@ export default function DialogAdd(props: IDialogAddProps) {
 
     const onSubmit = form.handleSubmit((data) => {
         createFn.mutate(data, {
-            onSuccess: () => onClose(),
+            onSuccess: (res) => {
+                toast.success(res.message);
+            },
             onError: (err) => {
                 toast.error(err.message);
             },
         });
     });
+
+    console.log("PRops : ", props);
+
+    console.log("Error : ", form.formState.errors);
 
     return (
         <Modal ref={props.dialogRef} title="Daftar Asisten Lab">

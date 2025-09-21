@@ -11,8 +11,11 @@ import { useQueryBuilder } from "@/hooks/use-query-builder";
 import { useCallback, useRef } from "react";
 import { debounce } from "lodash";
 import DialogShift, { IDialogsRef } from "../dialogs";
+import { useAccess } from "@/hooks/useAccess";
 
 export default function TableShift() {
+    const { access } = useAccess("SHIFT");
+
     const { params, updateParams } = useQueryBuilder();
 
     const dialogsRef = useRef<IDialogsRef>(null);
@@ -30,6 +33,7 @@ export default function TableShift() {
     });
 
     const columns = createColumns({
+        access: access,
         onEdit: (id: string) => {
             dialogsRef.current?.openDialogEdit(id);
         },
@@ -72,7 +76,7 @@ export default function TableShift() {
                 placeholder: "Cari shift",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => dialogsRef.current?.openDialogAdd()}

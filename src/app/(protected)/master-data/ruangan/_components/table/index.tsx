@@ -11,8 +11,11 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { DataTable } from "@/components/shared/data-table";
 import DialogRuangan, { IDialogsRef } from "../dialogs";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TableRuangan() {
+    const { access } = useAccess(ACCESS.RUANGAN);
     const { params, updateParams } = useQueryBuilder();
 
     const dialogRef = useRef<IDialogsRef>(null);
@@ -24,6 +27,7 @@ export default function TableRuangan() {
     };
 
     const columns = createColumns({
+        access,
         onEdit: (id: string) => dialogRef.current?.openDialogEdit(id),
         onActivate: (id: string, isActive: boolean) => onActivate(id, isActive),
         onAssign: (id: string) => dialogRef.current?.openDialogAssign(id),
@@ -51,7 +55,7 @@ export default function TableRuangan() {
                 placeholder: "Cari ruangan",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => dialogRef.current?.openDialogAdd()}

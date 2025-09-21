@@ -5,13 +5,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import ActionMenu from "@/components/shared/action-menu";
-import { TJadwal } from "@/types/data";
+import { TAccess, TJadwal } from "@/types/data";
 
 interface ICreateColumnsProps {
+    access: TAccess["actions"] | undefined | null;
     onDetail: (id: string) => void;
     onEdit: (id: string) => void;
     onAbsensi: (id: string) => void;
     onEditPertemuan: (id: string) => void;
+    onAssignMhs: (id: string) => void;
     currentPage?: number;
     pageSize?: number;
 }
@@ -23,10 +25,12 @@ type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
 type ColumnType = TJadwal;
 
 export const createColumns = ({
+    access,
     onDetail,
     onAbsensi,
     onEditPertemuan,
     onEdit,
+    onAssignMhs,
     currentPage = 1,
     pageSize = 10,
 }: ICreateColumnsProps): Array<CustomColumnDef<ColumnType, unknown>> => [
@@ -115,37 +119,65 @@ export const createColumns = ({
             return (
                 <ActionMenu>
                     <DropdownMenuGroup className="flex flex-col gap-2">
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onDetail(row.original.id)}
-                        >
-                            <Icon icon="ph:eye" />
-                            <span>Detail</span>
-                        </DropdownMenuItem>
+                        {access?.VIEW && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onDetail(row.original.id)}
+                            >
+                                <Icon icon="ph:eye" />
+                                <span>Detail</span>
+                            </DropdownMenuItem>
+                        )}
 
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onEdit(row.original.id)}
-                        >
-                            <Icon icon="mdi:pencil" />
-                            <span>Edit</span>
-                        </DropdownMenuItem>
+                        {access?.UPDATE && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onEdit(row.original.id)}
+                            >
+                                <Icon icon="mdi:pencil" />
+                                <span>Edit</span>
+                            </DropdownMenuItem>
+                        )}
 
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onAbsensi(row.original.id)}
-                        >
-                            <Icon icon="mdi:file-document-outline" />
-                            <span>Absensi</span>
-                        </DropdownMenuItem>
+                        {access?.ABSENT && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onAbsensi(row.original.id)}
+                            >
+                                <Icon icon="mdi:file-document-outline" />
+                                <span>Absensi</span>
+                            </DropdownMenuItem>
+                        )}
 
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onEditPertemuan(row.original.id)}
-                        >
-                            <Icon icon="mdi:calendar-outline" />
-                            <span>Edit Pertemuan</span>
-                        </DropdownMenuItem>
+                        {access?.UPDATE_MEETING && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onEditPertemuan(row.original.id)}
+                            >
+                                <Icon icon="mdi:calendar-outline" />
+                                <span>Edit Pertemuan</span>
+                            </DropdownMenuItem>
+                        )}
+
+                        {access?.ASSIGN_MAHASISWA && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onAssignMhs(row.original.id)}
+                            >
+                                <Icon icon="mdi:account-plus" />
+                                <span>Assign Praktikan</span>
+                            </DropdownMenuItem>
+                        )}
+
+                        {access?.ASSIGN_ASISTEN_LAB && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onEditPertemuan(row.original.id)}
+                            >
+                                <Icon icon="mdi:account-multiple" />
+                                <span>Assign Asisten</span>
+                            </DropdownMenuItem>
+                        )}
                     </DropdownMenuGroup>
                 </ActionMenu>
             );

@@ -12,13 +12,18 @@ import { DataTable } from "@/components/shared/data-table";
 import { IDialogsRef } from "../dialogs";
 import { useQuery } from "@tanstack/react-query";
 import DialogMatakuliah from "../dialogs";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TableMatakuliah() {
+    const { access } = useAccess(ACCESS.MATA_KULIAH);
+
     const { params, updateParams } = useQueryBuilder();
 
     const dialogRef = useRef<IDialogsRef>(null);
 
     const columns = createColumns({
+        access,
         onEdit: (id: string) => dialogRef.current?.openDialogEdit(id),
         onDelete: (id: string) => dialogRef.current?.openDialogDelete(id),
     });
@@ -51,7 +56,7 @@ export default function TableMatakuliah() {
                 placeholder: "Cari matakuliah berdasarkan nama dan kode",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => dialogRef.current?.openDialogAdd()}

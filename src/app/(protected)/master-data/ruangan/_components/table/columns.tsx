@@ -6,9 +6,10 @@ import {
 import { Icon } from "@iconify/react/dist/iconify.js";
 import ActionMenu from "@/components/shared/action-menu";
 import { Switch } from "@/components/ui/switch";
-import { TRuanganLaboratorium } from "@/types/data";
+import { TAccess, TRuanganLaboratorium } from "@/types/data";
 
 interface ICreateColumnsProps {
+    access: TAccess["actions"] | undefined | null;
     onEdit: (id: string) => void;
     onActivate: (id: string, isActive: boolean) => void;
     onAssign: (id: string) => void;
@@ -23,6 +24,7 @@ type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
 type ColumnType = TRuanganLaboratorium;
 
 export const createColumns = ({
+    access,
     onEdit,
     onActivate,
     onAssign,
@@ -87,12 +89,14 @@ export const createColumns = ({
 
             return (
                 <div className="flex items-center gap-2 justify-center">
-                    <Switch
-                        checked={status}
-                        onCheckedChange={() =>
-                            onActivate(row.original.id, !status)
-                        }
-                    />
+                    {access?.DELETE && (
+                        <Switch
+                            checked={status}
+                            onCheckedChange={() =>
+                                onActivate(row.original.id, !status)
+                            }
+                        />
+                    )}
                     <span>
                         {row.original.isActive ? "Aktif" : "Tidak Aktif"}
                     </span>
@@ -108,21 +112,25 @@ export const createColumns = ({
             return (
                 <ActionMenu>
                     <DropdownMenuGroup className="flex flex-col gap-2">
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onEdit(row.original.id)}
-                        >
-                            <Icon icon="mdi:pencil" />
-                            <span>Edit</span>
-                        </DropdownMenuItem>
+                        {access?.UPDATE && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onEdit(row.original.id)}
+                            >
+                                <Icon icon="mdi:pencil" />
+                                <span>Edit</span>
+                            </DropdownMenuItem>
+                        )}
 
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onAssign(row.original.id)}
-                        >
-                            <Icon icon="mdi:user-plus" />
-                            <span>Assign Kepala Lab</span>
-                        </DropdownMenuItem>
+                        {access?.ASSIGN && (
+                            <DropdownMenuItem
+                                className="inline-flex items-center gap-2"
+                                onClick={() => onAssign(row.original.id)}
+                            >
+                                <Icon icon="mdi:user-plus" />
+                                <span>Assign Kepala Lab</span>
+                            </DropdownMenuItem>
+                        )}
                     </DropdownMenuGroup>
                 </ActionMenu>
             );

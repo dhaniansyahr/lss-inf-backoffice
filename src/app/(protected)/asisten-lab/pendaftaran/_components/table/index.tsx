@@ -8,12 +8,13 @@ import { useCallback, useRef, useState } from "react";
 import { debounce } from "lodash";
 import { DataTable } from "@/components/shared/data-table";
 import { useQuery } from "@tanstack/react-query";
-import Tabs from "@/components/shared/tabs";
 import { IModalRef } from "@/components/shared/modal";
 import DialogAdd from "../dialogs/add";
 import { TpendaftaranAsistenLab } from "@/types/data";
 import { createColumnsRegistered } from "./columns-terdaftar";
 import DialogEdit from "../dialogs/edit";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 const TABS = [
     { label: "Daftar", value: "REQUEST" },
@@ -21,6 +22,8 @@ const TABS = [
 ];
 
 export default function TablePendaftaranAsistenLab() {
+    const { access } = useAccess(ACCESS.PENDAFTARAN_ASISTEN_LAB);
+
     const [tab, setTab] = useState<string>("REQUEST");
 
     const { params, updateParams } = useQueryBuilder();
@@ -32,18 +35,20 @@ export default function TablePendaftaranAsistenLab() {
     const dialogEditRef = useRef<IModalRef>(null);
 
     const columns = createColumns({
+        access,
         onRequest: (id: string) => {
             dialogAddRef.current?.open();
             setId(id);
         },
     });
 
-    const columnsRegistered = createColumnsRegistered({
-        onUpdate: (v: TpendaftaranAsistenLab | null) => {
-            dialogEditRef.current?.open();
-            setValues(v);
-        },
-    });
+    // const columnsRegistered = createColumnsRegistered({
+    //     access,
+    //     onUpdate: (v: TpendaftaranAsistenLab | null) => {
+    //         dialogEditRef.current?.open();
+    //         setValues(v);
+    //     },
+    // });
 
     const { data, isLoading } = useQuery({
         ...service.jadwal.getAll({
@@ -54,17 +59,6 @@ export default function TablePendaftaranAsistenLab() {
         }),
         queryKey: ["jadwal", params, "REQUEST"],
         enabled: tab === "REQUEST",
-    });
-
-    const { data: dataRegistered, isLoading: isLoadingRegistered } = useQuery({
-        ...service.asistenLab.getAll({
-            ...params,
-            filters: {
-                status: "PENDING",
-            },
-        }),
-        queryKey: ["asisten-lab", params, "REGISTERED"],
-        enabled: tab === "REGISTERED",
     });
 
     const onSearch = useCallback(
@@ -86,47 +80,25 @@ export default function TablePendaftaranAsistenLab() {
                 onSearch: onSearch,
                 placeholder: "Cari jadwal berdasarkan nama dan kode matakuliah",
             }}
-            tab={<Tabs tabs={TABS} value={tab} onChange={setTab} />}
+            // tab={<Tabs tabs={TABS} value={tab} onChange={setTab} />}
             dataTable={
-                <>
-                    {tab === "REQUEST" ? (
-                        <DataTable
-                            columns={columns}
-                            data={data?.content?.entries ?? []}
-                            isLoading={isLoading}
-                            paginate={{
-                                page: params.page ?? 1,
-                                rows: params.rows ?? 10,
-                                totalData: data?.content?.totalData,
-                                totalPage: data?.content?.totalPage,
-                            }}
-                            onPaginate={(page) => {
-                                updateParams({
-                                    page: page,
-                                    rows: params.rows ?? 10,
-                                });
-                            }}
-                        />
-                    ) : (
-                        <DataTable
-                            columns={columnsRegistered}
-                            data={dataRegistered?.content?.entries ?? []}
-                            isLoading={isLoadingRegistered}
-                            paginate={{
-                                page: params.page ?? 1,
-                                rows: params.rows ?? 10,
-                                totalData: dataRegistered?.content?.totalData,
-                                totalPage: dataRegistered?.content?.totalPage,
-                            }}
-                            onPaginate={(page) => {
-                                updateParams({
-                                    page: page,
-                                    rows: params.rows ?? 10,
-                                });
-                            }}
-                        />
-                    )}
-                </>
+                <DataTable
+                    columns={columns}
+                    data={data?.content?.entries ?? []}
+                    isLoading={isLoading}
+                    paginate={{
+                        page: params.page ?? 1,
+                        rows: params.rows ?? 10,
+                        totalData: data?.content?.totalData,
+                        totalPage: data?.content?.totalPage,
+                    }}
+                    onPaginate={(page) => {
+                        updateParams({
+                            page: page,
+                            rows: params.rows ?? 10,
+                        });
+                    }}
+                />
             }
         >
             <DialogAdd dialogRef={dialogAddRef} jadwalId={id} />
@@ -134,3 +106,25 @@ export default function TablePendaftaranAsistenLab() {
         </TableLayout>
     );
 }
+
+//         ) : (
+//             <DataTable
+//                 columns={columnsRegistered}
+//                 data={dataRegistered?.content?.entries ?? []}
+//                 isLoading={isLoadingRegistered}
+//                 paginate={{
+//                     page: params.page ?? 1,
+//                     rows: params.rows ?? 10,
+//                     totalData: dataRegistered?.content?.totalData,
+//                     totalPage: dataRegistered?.content?.totalPage,
+//                 }}
+//                 onPaginate={(page) => {
+//                     updateParams({
+//                         page: page,
+//                         rows: params.rows ?? 10,
+//                     });
+//                 }}
+//             />
+//         )}
+//     </>
+// }

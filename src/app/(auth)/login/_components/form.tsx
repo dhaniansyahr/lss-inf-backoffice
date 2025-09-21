@@ -16,7 +16,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { TLoginRequest, TVerifyResponse } from "@/services/auth/types";
+import { TLoginRequest, TLoginResponse } from "@/services/auth/types";
 import { setSession } from "@/utils/session";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -37,7 +37,9 @@ export default function LoginForm() {
     const onSubmit = form.handleSubmit((value: TLoginRequest) => {
         authFn.mutate(value, {
             onSuccess: (data) => {
-                setSession(data.content as TVerifyResponse);
+                console.log("Data After Login : ", data);
+
+                setSession(data.content as TLoginResponse);
 
                 setTimeout(() => {
                     window.location.href = REDIRECT_URL;

@@ -11,15 +11,18 @@ import { useCallback } from "react";
 import { debounce } from "lodash";
 import { createColumns } from "./columns";
 import { useRouter } from "next/navigation";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TableRoles() {
+    const { access } = useAccess(ACCESS.ROLE_MANAGEMENT);
+
     const router = useRouter();
 
     const { params, updateParams } = useQueryBuilder();
 
-    // const dialogsRef = useRef<IDialogsRef>(null);
-
     const columns = createColumns({
+        access,
         onEdit: (id: string) => {
             console.log(id);
         },
@@ -58,7 +61,7 @@ export default function TableRoles() {
                 placeholder: "Cari role berdasarkan nama",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => router.push("/pengaturan/role/create")}

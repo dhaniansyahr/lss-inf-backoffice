@@ -7,11 +7,15 @@ import DialogEdit from "./edit";
 import DialogConfirmation from "@/components/shared/confirmation-dialog";
 import { useMutation } from "@tanstack/react-query";
 import DialogOptionsCreate from "./create-options";
+import DialogAssignOptions from "@/components/shared/options-create-dialog";
 import DialogAddTeori from "./add-teori";
 import DialogEditPertemuan from "./edit-pertemuan";
+import DialogManualAssignPraktikan from "./assing-praktikan";
+import { toast } from "sonner";
 
 export interface IDialogsRef {
     openDialogAdd: () => void;
+    openDialogAssingMhs: (id: string) => void;
     openDialogEdit: (id: string) => void;
     openDialogOptionsCreate: () => void;
     openDialogDelete: (id: string) => void;
@@ -31,9 +35,15 @@ const DialogJadwal = (props: IDialogsProps) => {
     const dialogOptionsCreateRef = useRef<IModalRef>(null);
     const dialogDeleteRef = useRef<IModalRef>(null);
     const dialogEditPertemuanRef = useRef<IModalRef>(null);
+    const dialogOptionAssignMhsnRef = useRef<IModalRef>(null);
+    const dialogManualAssignMhsRef = useRef<IModalRef>(null);
 
     useImperativeHandle(props.ref, () => ({
         openDialogAdd: () => dialogOptionsCreateRef.current?.open(),
+        openDialogAssingMhs: (id: string) => {
+            dialogOptionAssignMhsnRef.current?.open();
+            setId(id);
+        },
         openDialogEdit: (id: string) => {
             dialogEditRef.current?.open();
             setId(id);
@@ -90,6 +100,39 @@ const DialogJadwal = (props: IDialogsProps) => {
         });
     };
 
+    const onManualAssignMhs = () => {
+        dialogOptionAssignMhsnRef.current?.close();
+        dialogManualAssignMhsRef.current?.open();
+    };
+
+    const bulkAssignMhsFn = useMutation(service.jadwal.bulkAssignMhs());
+
+    const onBulkAssignMhs = () => {
+        const inputElement = document.createElement("input");
+        inputElement.type = "file";
+        inputElement.accept = ".xlsx, .xls";
+
+        inputElement.onchange = (event) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (file) {
+                bulkAssignMhsFn.mutate(
+                    { id, data: { file } },
+                    {
+                        onSuccess: (res) => {
+                            toast.success(res.message);
+                            dialogOptionAssignMhsnRef.current?.close();
+                        },
+                        onError: (error) => {
+                            toast.error(error.message);
+                        },
+                    }
+                );
+            }
+        };
+
+        inputElement.click();
+    };
+
     return (
         <Fragment>
             <DialogOptionsCreate
@@ -102,6 +145,20 @@ const DialogJadwal = (props: IDialogsProps) => {
                     onCheck();
                 }}
                 isGenerate={generateFn.isPending || checkFn.isPending}
+            />
+
+            <DialogAssignOptions
+                dialogRef={dialogOptionAssignMhsnRef}
+                templateLink="/app/template/mahasiswa.xlsx"
+                feature="Assign Mahasiswa"
+                onManual={onManualAssignMhs}
+                onBulkUpload={onBulkAssignMhs}
+                isBulkUpload={bulkAssignMhsFn.isPending}
+            />
+
+            <DialogManualAssignPraktikan
+                dialogRef={dialogManualAssignMhsRef}
+                id={id}
             />
 
             <DialogAddTeori dialogRef={dialogTeoriRef} />

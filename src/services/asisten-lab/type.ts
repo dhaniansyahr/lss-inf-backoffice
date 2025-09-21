@@ -8,7 +8,6 @@ const request = z.object({
         .string()
         .nonempty({ message: "Nilai Praktikum harus diisi!" }),
     nilaiAkhir: z.string().nonempty({ message: "Nilai Akhir harus diisi!" }),
-    keterangan: z.string().optional(),
 });
 
 const acceptance = z.object({

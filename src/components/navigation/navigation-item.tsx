@@ -11,7 +11,6 @@ import {
     SidebarMenuButton,
     SidebarMenuSub,
     SidebarGroupLabel,
-    SidebarSeparator,
     useSidebar,
 } from "@/components/ui/sidebar";
 import { useNavigation } from "./navigation-provider";
@@ -39,20 +38,6 @@ export function NavigationItem({
         }
     };
 
-    // Render separator
-    if (item.type === "SEPERATOR") {
-        return (
-            <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-            >
-                <SidebarSeparator />
-            </motion.div>
-        );
-    }
-
     // Render header
     if (item.type === "HEADER") {
         return (
@@ -64,7 +49,7 @@ export function NavigationItem({
                 <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {item.label}
                 </SidebarGroupLabel>
-                {item.items && (
+                {/* {item.items && (
                     <SidebarMenu>
                         <AnimatePresence>
                             {item.items.map((subItem, index) => (
@@ -76,7 +61,7 @@ export function NavigationItem({
                             ))}
                         </AnimatePresence>
                     </SidebarMenu>
-                )}
+                )} */}
             </motion.div>
         );
     }

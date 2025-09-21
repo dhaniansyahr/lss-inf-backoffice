@@ -1,13 +1,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-    DropdownMenuGroup,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import ActionMenu from "@/components/shared/action-menu";
-import { TpendaftaranAsistenLab } from "@/types/data";
+import { TAccess, TpendaftaranAsistenLab } from "@/types/data";
+import { Button } from "@/components/ui/button";
 
 interface ICreateColumnsProps {
+    access: TAccess["actions"] | undefined | null;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     currentPage?: number;
@@ -21,6 +17,7 @@ type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
 type ColumnType = TpendaftaranAsistenLab;
 
 export const createColumns = ({
+    access,
     onEdit,
     onDelete,
     currentPage = 1,
@@ -96,49 +93,25 @@ export const createColumns = ({
         isCenter: true,
         cell: ({ row }) => {
             return (
-                <ActionMenu>
-                    <DropdownMenuGroup className="flex flex-col gap-2">
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
+                access?.ACCEPTED && (
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size={"sm"}
+                            variant={"destructive"}
                             onClick={() => onDelete(row.original.id)}
                         >
-                            <Icon icon="ph:eye" />
-                            <span>Detail</span>
-                        </DropdownMenuItem>
+                            Tolak
+                        </Button>
 
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
+                        <Button
+                            size={"sm"}
+                            variant={"default"}
                             onClick={() => onEdit(row.original.id)}
                         >
-                            <Icon icon="mdi:pencil" />
-                            <span>Edit</span>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onDelete(row.original.id)}
-                        >
-                            <Icon icon="mdi:file-document-outline" />
-                            <span>Absensi</span>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2"
-                            onClick={() => onDelete(row.original.id)}
-                        >
-                            <Icon icon="mdi:calendar-outline" />
-                            <span>Edit Pertemuan</span>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                            className="inline-flex items-center gap-2 text-red-500"
-                            onClick={() => onDelete(row.original.id)}
-                        >
-                            <Icon icon="mdi:trash" />
-                            <span>Hapus</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                </ActionMenu>
+                            Terima
+                        </Button>
+                    </div>
+                )
             );
         },
         size: 50,

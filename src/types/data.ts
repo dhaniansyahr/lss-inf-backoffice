@@ -198,6 +198,46 @@ export type TpendaftaranAsistenLab = {
     updatedAt: Date;
 };
 
+export type TParticipant = {
+    id: string;
+    name: string;
+    noIdentitas: string;
+    type: "DOSEN" | "MAHASISWA" | "ASISTEN_LAB";
+    meetings: TParticipantMeetings;
+};
+
+export type TParticipantMeetings = {
+    pertemuan1Id: string;
+    pertemuan1: boolean;
+    pertemuan2Id: string;
+    pertemuan2: boolean;
+    pertemuan3Id: string;
+    pertemuan3: boolean;
+    pertemuan4Id: string;
+    pertemuan4: boolean;
+    pertemuan5Id: string;
+    pertemuan5: boolean;
+    pertemuan6Id: string;
+    pertemuan6: boolean;
+    pertemuan7Id: string;
+    pertemuan7: boolean;
+    pertemuan8Id: string;
+    pertemuan8: boolean;
+    pertemuan9Id: string;
+    pertemuan9: boolean;
+    pertemuan10Id: string;
+    pertemuan10: boolean;
+    pertemuan11Id: string;
+    pertemuan11: boolean;
+    pertemuan12Id: string;
+    pertemuan12: boolean;
+};
+
+export type TListParticipants = {
+    meetings: TMeeting[];
+    participants: TParticipant[];
+};
+
 export type TOverrideJadwal = {
     id: string;
     jadwalId: string;
@@ -297,4 +337,22 @@ export type TAllFeatures = {
     actions: {
         name: string;
     }[];
+};
+
+export type TAccess = {
+    featureName: "JADWAL";
+    actions: {
+        VIEW: boolean;
+        ASSIGN: boolean;
+        CREATE: boolean;
+        DELETE: boolean;
+        UPDATE: boolean;
+        BULK: boolean;
+        ABSENT: boolean;
+        ASSIGN_ASISTEN_LAB: boolean;
+        ASSIGN_MAHASISWA: boolean;
+        GENERATE: boolean;
+        UPDATE_MEETING: boolean;
+        ACCEPTED: boolean;
+    };
 };

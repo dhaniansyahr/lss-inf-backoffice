@@ -12,13 +12,18 @@ import { DataTable } from "@/components/shared/data-table";
 import { IDialogsRef } from "../dialogs";
 import { useQuery } from "@tanstack/react-query";
 import DialogDosen from "../dialogs";
+import { useAccess } from "@/hooks/useAccess";
+import { ACCESS } from "@/constants/access";
 
 export default function TableDosen() {
+    const { access } = useAccess(ACCESS.DOSEN);
+
     const { params, updateParams } = useQueryBuilder();
 
     const dialogRef = useRef<IDialogsRef>(null);
 
     const columns = createColumns({
+        access,
         onEdit: (id: string) => dialogRef.current?.openDialogEdit(id),
         onDelete: (id: string) => dialogRef.current?.openDialogDelete(id),
     });
@@ -45,7 +50,7 @@ export default function TableDosen() {
                 placeholder: "Cari dosen berdasarkan nama dan nip",
             }}
             actions={{
-                right: (
+                right: access?.CREATE && (
                     <Button
                         size={"lg"}
                         onClick={() => dialogRef.current?.openDialogAdd()}

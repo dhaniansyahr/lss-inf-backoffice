@@ -19,10 +19,18 @@ const meeting = z.object({
     meetingId: z.string().nonempty({ message: "Meeting ID harus diisi!" }),
 });
 
+const absent = z.object({
+    identity: z.string().nonempty({ message: "Identitas harus diisi!" }),
+    meetingId: z.string().nonempty({ message: "Meeting ID harus diisi!" }),
+    type: z.enum(["DOSEN", "MAHASISWA", "ASISTEN_LAB"]),
+});
+
 export type TJadwalRequest = z.infer<typeof jadwal>;
 export type TMeetingRequest = z.infer<typeof meeting>;
+export type TAbsentRequest = z.infer<typeof absent>;
 
 export const schema = {
     jadwal,
     meeting,
+    absent,
 };
