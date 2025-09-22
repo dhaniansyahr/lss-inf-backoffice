@@ -16,7 +16,7 @@ export const api_service = {
     },
     create: (data: TRequestAssistenLab) => {
         return api.post<TResponse<TpendaftaranAsistenLab>>(
-            "/asisten-lab",
+            "/asisten-lab/request",
             data
         );
     },

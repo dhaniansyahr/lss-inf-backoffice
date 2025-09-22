@@ -22,6 +22,11 @@ export type TUserLevels = {
     updatedAt: Date;
 };
 
+export type TAssignAccess = {
+    featureName: string;
+    actions: string[];
+};
+
 export type TFeatures = {
     id: string;
     name: string;

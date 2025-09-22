@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 interface ICreateColumnsProps {
     access: TAccess["actions"] | undefined | null;
-    onEdit: (id: string) => void;
+    onAcceptance: (id: string) => void;
     onDelete: (id: string) => void;
     currentPage?: number;
     pageSize?: number;
@@ -18,7 +18,7 @@ type ColumnType = TpendaftaranAsistenLab;
 
 export const createColumns = ({
     access,
-    onEdit,
+    onAcceptance,
     onDelete,
     currentPage = 1,
     pageSize = 10,
@@ -39,66 +39,70 @@ export const createColumns = ({
         cell: ({ row }) => {
             return (
                 <div>
-                    {row.original.mahasiswa.nama ?? "-"} -{" "}
-                    {row.original.mahasiswa.npm ?? "-"}
+                    {row.original.mahasiswaId ?? "-"} -{" "}
+                    {/* {row.original.mahasiswa.nama ?? "-"} -{" "}
+                    {row.original.mahasiswa.npm ?? "-"} */}
                 </div>
             );
         },
         isCenter: true,
     },
-    {
-        accessorKey: "matakuliah.nama",
-        header: "Matakuliah",
-        cell: ({ row }) => {
-            return (
-                <div>
-                    {row.original.matakuliah.kode ?? "-"} -{" "}
-                    {row.original.matakuliah.nama ?? "-"}
-                </div>
-            );
-        },
-    },
-    {
-        accessorKey: "kelas",
-        header: "Kelas",
-        isCenter: true,
-        cell: ({ row }) => {
-            return <div>{row.original.jadwal.kelas ?? "-"}</div>;
-        },
-    },
-    {
-        accessorKey: "shift",
-        header: "Waktu",
-        cell: ({ row }) => {
-            return (
-                <div>
-                    {row.original.jadwal.shift.startTime ?? "-"} -{" "}
-                    {row.original.jadwal.shift.endTime ?? "-"}
-                </div>
-            );
-        },
-        isCenter: true,
-    },
-    {
-        accessorKey: "jadwal.ruangan.nama",
-        header: "Ruangan",
-        cell: ({ row }) => {
-            return <div>{row.original.jadwal.ruangan.nama ?? "-"}</div>;
-        },
-        isCenter: true,
-    },
+    // {
+    //     accessorKey: "matakuliah.nama",
+    //     header: "Matakuliah",
+    //     cell: ({ row }) => {
+    //         return (
+    //             <div>
+    //                 {row.original.matakuliah.kode ?? "-"} -{" "}
+    //                 {row.original.matakuliah.nama ?? "-"}
+    //             </div>
+    //         );
+    //     },
+    // },
+    // {
+    //     accessorKey: "kelas",
+    //     header: "Kelas",
+    //     isCenter: true,
+    //     cell: ({ row }) => {
+    //         return <div>{row.original.jadwal.kelas ?? "-"}</div>;
+    //     },
+    // },
+    // {
+    //     accessorKey: "shift",
+    //     header: "Waktu",
+    //     cell: ({ row }) => {
+    //         return (
+    //             <div>
+    //                 {row.original.jadwal.shift.startTime ?? "-"} -{" "}
+    //                 {row.original.jadwal.shift.endTime ?? "-"}
+    //             </div>
+    //         );
+    //     },
+    //     isCenter: true,
+    // },
+    // {
+    //     accessorKey: "jadwal.ruangan.nama",
+    //     header: "Ruangan",
+    //     cell: ({ row }) => {
+    //         return <div>{row.original.jadwal.ruangan.nama ?? "-"}</div>;
+    //     },
+    //     isCenter: true,
+    // },
     {
         id: "actions",
         header: "Aksi",
         isCenter: true,
         cell: ({ row }) => {
+            const isDisabled = row.original.status !== "PENDING";
+
             return (
                 access?.ACCEPTED && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
                         <Button
                             size={"sm"}
                             variant={"destructive"}
                             onClick={() => onDelete(row.original.id)}
+                            disabled={isDisabled}
                         >
                             Tolak
                         </Button>
@@ -106,7 +110,8 @@ export const createColumns = ({
                         <Button
                             size={"sm"}
                             variant={"default"}
-                            onClick={() => onEdit(row.original.id)}
+                            onClick={() => onAcceptance(row.original.id)}
+                            disabled={isDisabled}
                         >
                             Terima
                         </Button>

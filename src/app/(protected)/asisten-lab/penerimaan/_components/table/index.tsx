@@ -4,34 +4,68 @@ import { TableLayout } from "@/components/shared/table-layout";
 import { useQueryBuilder } from "@/hooks/use-query-builder";
 import { createColumns } from "./columns";
 import { service } from "@/services";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { debounce } from "lodash";
 import { DataTable } from "@/components/shared/data-table";
-import { IDialogsRef } from "../dialogs";
-import { useQuery } from "@tanstack/react-query";
-import DialogJadwal from "../dialogs";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccess } from "@/hooks/useAccess";
 import { ACCESS } from "@/constants/access";
+import { TAcceptanceAssistenLab } from "@/services/asisten-lab/type";
+import { toast } from "sonner";
+import { DateTime } from "luxon";
+import { IModalRef } from "@/components/shared/modal";
+import DialogRejected from "../dialogs/rejected";
 
 export default function TablePenerimaanAsistenLab() {
-    const { access } = useAccess(ACCESS.ASISTEN_LAB);
+    const queryClient = useQueryClient();
+
+    const { access } = useAccess(ACCESS.PENERIMAAN_ASISTEN_LAB);
 
     const { params, updateParams } = useQueryBuilder();
 
-    const dialogRef = useRef<IDialogsRef>(null);
+    const dialogRejectedRef = useRef<IModalRef>(null);
+    const [rejectedId, setRejectedId] = useState<string>("");
+
+    const acceptanceFn = useMutation(service.asistenLab.acceptance());
+
+    const onAcceptance = (id: string) => {
+        const body: TAcceptanceAssistenLab = {
+            status: "DISETUJUI",
+            keterangan: `Telah disetujui sebagai asisten lab pada ${DateTime.now().toFormat(
+                "dd MMMM yyyy HH:mm"
+            )}`,
+        };
+        acceptanceFn.mutate(
+            { id, data: body },
+            {
+                onSuccess: (res) => {
+                    toast.success(res.message);
+                    queryClient.invalidateQueries({
+                        queryKey: ["asisten-lab", params],
+                    });
+                },
+                onError: (err) => {
+                    toast.error(err.message);
+                },
+            }
+        );
+    };
 
     const columns = createColumns({
         access,
-        onEdit: (id: string) => dialogRef.current?.openDialogEdit(id),
-        onDelete: (id: string) => dialogRef.current?.openDialogDelete(id),
+        onAcceptance: (id: string) => onAcceptance(id),
+        onDelete: (id: string) => {
+            dialogRejectedRef.current?.open();
+            setRejectedId(id);
+        },
     });
 
     const { data, isLoading } = useQuery(
         service.asistenLab.getAll({
             ...params,
-            filters: {
-                status: "DISETUJUI",
-            },
+            // filters: {
+            //     status: "DISETUJUI",
+            // },
         })
     );
 
@@ -80,7 +114,7 @@ export default function TablePenerimaanAsistenLab() {
                 />
             }
         >
-            <DialogJadwal ref={dialogRef} />
+            <DialogRejected dialogRef={dialogRejectedRef} id={rejectedId} />
         </TableLayout>
     );
 }

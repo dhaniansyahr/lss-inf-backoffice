@@ -37,8 +37,6 @@ export default function LoginForm() {
     const onSubmit = form.handleSubmit((value: TLoginRequest) => {
         authFn.mutate(value, {
             onSuccess: (data) => {
-                console.log("Data After Login : ", data);
-
                 setSession(data.content as TLoginResponse);
 
                 setTimeout(() => {

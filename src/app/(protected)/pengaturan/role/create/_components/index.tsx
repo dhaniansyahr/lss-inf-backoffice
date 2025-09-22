@@ -21,7 +21,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Icon } from "@iconify/react/dist/iconify.js";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { service } from "@/services";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,8 +29,13 @@ import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { schema, TAclRequest } from "@/services/pengguna/role/type";
+import { useQueryBuilder } from "@/hooks/use-query-builder";
+import { formatEnumToTitleCase } from "@/utils/string.utils";
+import { toast } from "sonner";
 
-export default function CreateRole() {
+export default function Container() {
+    const { params } = useQueryBuilder();
+
     const router = useRouter();
 
     const form = useForm<TAclRequest>({
@@ -41,14 +46,22 @@ export default function CreateRole() {
         },
     });
 
-    // Fetch all features
-    const { data, isLoading } = useQuery(service.roles.getAllFeatures());
+    const createFn = useMutation(service.roles.create());
 
-    const onSubmit = (data: TAclRequest) => {
-        // createRoleMutation.mutate(data, {
-        //     onSettled: () => setIsLoading(false),
-        // });
-    };
+    // Fetch all features
+    const { data, isLoading } = useQuery(service.roles.getAllFeatures(params));
+
+    const onSubmit = form.handleSubmit((data: TAclRequest) => {
+        createFn.mutate(data, {
+            onSuccess: (res) => {
+                toast.success(res.message);
+                router.back();
+            },
+            onError: (error) => {
+                toast.error(error.message);
+            },
+        });
+    });
 
     const handleCheckboxChange = (
         featureName: string,
@@ -91,15 +104,13 @@ export default function CreateRole() {
         form.setValue("permissions", currentPermissions);
     };
 
+    const onBack = () => router.back();
+
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => router.back()}
-                >
+                <Button variant="ghost" size="icon" onClick={onBack}>
                     <Icon icon="mdi:arrow-left" className="h-4 w-4" />
                 </Button>
                 <h1 className="text-2xl font-semibold">Tambah Role Akses</h1>
@@ -109,10 +120,7 @@ export default function CreateRole() {
             <Card>
                 <CardContent className="p-6">
                     <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-6"
-                        >
+                        <form onSubmit={onSubmit} className="space-y-6">
                             {/* Role Name Input */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
@@ -189,45 +197,51 @@ export default function CreateRole() {
                                                                     }
                                                                 >
                                                                     <TableCell>
-                                                                        {
+                                                                        {formatEnumToTitleCase(
                                                                             feature.name
-                                                                        }
-                                                                    </TableCell>
-                                                                    <TableCell className="flex items-center gap-2">
-                                                                        {feature.actions.map(
-                                                                            (
-                                                                                action,
-                                                                                actionIdx
-                                                                            ) => (
-                                                                                <div
-                                                                                    key={
-                                                                                        actionIdx
-                                                                                    }
-                                                                                    className="flex items-center gap-2"
-                                                                                >
-                                                                                    <Checkbox
-                                                                                        id={`${feature.name}-${action.name}`}
-                                                                                        onCheckedChange={(
-                                                                                            checked
-                                                                                        ) =>
-                                                                                            handleCheckboxChange(
-                                                                                                feature.name,
-                                                                                                action.name,
-                                                                                                checked as boolean
-                                                                                            )
-                                                                                        }
-                                                                                    />
-                                                                                    <Label
-                                                                                        htmlFor={`${feature.name}-${action.name}`}
-                                                                                        className="text-sm font-normal cursor-pointer"
-                                                                                    >
-                                                                                        {
-                                                                                            action.name
-                                                                                        }
-                                                                                    </Label>
-                                                                                </div>
-                                                                            )
                                                                         )}
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <div className="grid grid-cols-4 gap-2">
+                                                                            {feature
+                                                                                .actions
+                                                                                .length >
+                                                                                0 &&
+                                                                                feature.actions.map(
+                                                                                    (
+                                                                                        action,
+                                                                                        actionIdx
+                                                                                    ) => (
+                                                                                        <div
+                                                                                            key={
+                                                                                                actionIdx
+                                                                                            }
+                                                                                            className="flex items-center gap-2 flex-wrap"
+                                                                                        >
+                                                                                            <Checkbox
+                                                                                                id={`${feature.name}-${action.name}`}
+                                                                                                onCheckedChange={(
+                                                                                                    checked
+                                                                                                ) =>
+                                                                                                    handleCheckboxChange(
+                                                                                                        feature.name,
+                                                                                                        action.name,
+                                                                                                        checked as boolean
+                                                                                                    )
+                                                                                                }
+                                                                                            />
+                                                                                            <Label
+                                                                                                htmlFor={`${feature.name}-${action.name}`}
+                                                                                                className="text-sm font-normal cursor-pointer"
+                                                                                            >
+                                                                                                {formatEnumToTitleCase(
+                                                                                                    action.name
+                                                                                                )}
+                                                                                            </Label>
+                                                                                        </div>
+                                                                                    )
+                                                                                )}
+                                                                        </div>
                                                                     </TableCell>
                                                                 </TableRow>
                                                             )
@@ -244,17 +258,16 @@ export default function CreateRole() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => router.back()}
+                                    onClick={onBack}
+                                    disabled={createFn.isPending}
                                 >
                                     Batal
                                 </Button>
-                                <Button type="submit" disabled={isLoading}>
-                                    {isLoading && (
-                                        <Icon
-                                            icon="mdi:loading"
-                                            className="animate-spin h-4 w-4 mr-2"
-                                        />
-                                    )}
+                                <Button
+                                    type="submit"
+                                    disabled={createFn.isPending}
+                                    loading={createFn.isPending}
+                                >
                                     Submit
                                 </Button>
                             </div>

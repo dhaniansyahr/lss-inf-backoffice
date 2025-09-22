@@ -4,30 +4,18 @@ import { motion } from "motion/react";
 import { NavigationItem } from "./navigation-item";
 import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
 import { IMenuItem } from "@/types/common";
-import { useQuery } from "@tanstack/react-query";
-import { service } from "@/services";
+
 import { Skeleton } from "../ui/skeleton";
+import { useHomeRoute } from "@/hooks/use-home-route";
 
 interface NavigationMenuProps {
     items: IMenuItem[];
 }
 
 export function NavigationMenu({ items }: NavigationMenuProps) {
-    const { data, isLoading } = useQuery(service.roles.getAvailableFeatures());
+    const { getAvailableMenuItems, isLoading } = useHomeRoute();
 
-    let availableItems: IMenuItem[] = [];
-
-    if (data) {
-        items.forEach((item) => {
-            if (item.type === "HEADER") {
-                availableItems.push(item);
-            } else {
-                if (data?.content?.includes(item.subject ?? "")) {
-                    availableItems.push(item);
-                }
-            }
-        });
-    }
+    const availableItems = getAvailableMenuItems(items);
 
     return (
         <SidebarGroup>

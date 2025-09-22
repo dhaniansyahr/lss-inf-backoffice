@@ -10,7 +10,7 @@ export const useAccess = (featureName: string) => {
 
     const access = data?.content?.actions;
 
-    if (!access?.VIEW) {
+    if (access && !access?.VIEW) {
         redirect("/401");
     }
 

@@ -3,3 +3,11 @@ export function formatTime(time: string, separator: string = ":"): string {
 
     return hours + ":" + minutes;
 }
+
+export function formatEnumToTitleCase(enumValue: string): string {
+    return enumValue
+        .toLowerCase()
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}

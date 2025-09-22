@@ -49,19 +49,6 @@ export function NavigationItem({
                 <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {item.label}
                 </SidebarGroupLabel>
-                {/* {item.items && (
-                    <SidebarMenu>
-                        <AnimatePresence>
-                            {item.items.map((subItem, index) => (
-                                <NavigationItem
-                                    key={`${subItem.label}-${index}`}
-                                    item={subItem}
-                                    level={level + 1}
-                                />
-                            ))}
-                        </AnimatePresence>
-                    </SidebarMenu>
-                )} */}
             </motion.div>
         );
     }

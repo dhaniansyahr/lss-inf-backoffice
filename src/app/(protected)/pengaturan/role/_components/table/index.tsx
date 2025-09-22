@@ -23,12 +23,8 @@ export default function TableRoles() {
 
     const columns = createColumns({
         access,
-        onEdit: (id: string) => {
-            console.log(id);
-        },
-        onDelete: (id: string) => {
-            console.log(id);
-        },
+        onEdit: (id: string) => router.push(`/pengaturan/role/${id}/edit`),
+        onDelete: (id: string) => console.log("ID"),
     });
 
     // Fetch Data

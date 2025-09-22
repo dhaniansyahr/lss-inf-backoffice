@@ -54,16 +54,13 @@ export default function DialogAdd(props: IDialogAddProps) {
         createFn.mutate(data, {
             onSuccess: (res) => {
                 toast.success(res.message);
+                onClose();
             },
             onError: (err) => {
                 toast.error(err.message);
             },
         });
     });
-
-    console.log("PRops : ", props);
-
-    console.log("Error : ", form.formState.errors);
 
     return (
         <Modal ref={props.dialogRef} title="Daftar Asisten Lab">

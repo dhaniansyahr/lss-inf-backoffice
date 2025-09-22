@@ -12,6 +12,9 @@ export const schemaLoginResponse = z.object({
     user: z.object({
         id: z.string(),
         email: z.string(),
+        nama: z.string().nullable(),
+        npm: z.string().nullable(),
+        nip: z.string().nullable(),
         fullName: z.string(),
         noIdentitas: z.string(),
         userLevelId: z.string().optional(),

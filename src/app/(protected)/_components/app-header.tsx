@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Settings, User, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -15,41 +15,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/stores/auth";
 import { service } from "@/services";
-import { NavigationItem } from "@/constants/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-
-const getTitle = (pathname: string) => {
-    for (const section of NavigationItem) {
-        if (section.items) {
-            const findTitle = section.items.find(
-                (item) => item.url === pathname
-            );
-
-            if (findTitle) {
-                return `${section.label} / ${findTitle.label}`;
-            }
-        }
-    }
-
-    const findTitleWithoutSection = NavigationItem.flatMap(
-        (section) => section.items || []
-    ).find((item) => item.url === pathname);
-
-    if (findTitleWithoutSection) {
-        return findTitleWithoutSection.label;
-    }
-
-    return "Dashboard";
-};
+import { useHomeRoute } from "@/hooks/use-home-route";
 
 export default function AppHeader() {
     const router = useRouter();
     const pathname = usePathname();
 
     const { user, setIsLogin, setAccessToken } = useAuth();
+
+    const { getTitle } = useHomeRoute();
 
     const getUserInitials = (email: string) => {
         return email
@@ -76,6 +54,10 @@ export default function AppHeader() {
             console.error("Logout failed:", error);
         },
     });
+
+    const identity = user?.npm || user?.nip || user?.email;
+    const name = user?.nama || user?.fullName;
+
     return (
         <motion.header
             initial={{ opacity: 0, y: -20 }}
@@ -112,14 +94,12 @@ export default function AppHeader() {
                                     >
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage
-                                                src=""
-                                                alt={user?.email || "User"}
+                                                src="/app/avatar.png"
+                                                alt={identity || "User"}
                                             />
                                             <AvatarFallback className="text-xs">
-                                                {user?.email
-                                                    ? getUserInitials(
-                                                          user.email
-                                                      )
+                                                {identity
+                                                    ? getUserInitials(identity)
                                                     : "U"}
                                             </AvatarFallback>
                                         </Avatar>
@@ -132,11 +112,10 @@ export default function AppHeader() {
                                     <DropdownMenuLabel className="font-normal">
                                         <div className="flex flex-col space-y-1">
                                             <p className="text-sm font-medium leading-none">
-                                                {user?.fullName || "User"}
+                                                {name || "User"}
                                             </p>
                                             <p className="text-xs leading-none text-muted-foreground">
-                                                {user?.email ??
-                                                    user?.noIdentitas}
+                                                {identity ?? user?.noIdentitas}
                                             </p>
                                             <Badge
                                                 variant="secondary"
@@ -146,21 +125,13 @@ export default function AppHeader() {
                                             </Badge>
                                         </div>
                                     </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem>
-                                        <User className="mr-2 h-4 w-4" />
-                                        <span>Profile</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                        <Settings className="mr-2 h-4 w-4" />
-                                        <span>Settings</span>
-                                    </DropdownMenuItem>
+
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         onClick={() => onLogout.mutate()}
                                         className="text-red-600 focus:text-red-600"
                                     >
-                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <LogOut className="mr-2 h-4 w-4 text-red-500" />
                                         <span>Log out</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

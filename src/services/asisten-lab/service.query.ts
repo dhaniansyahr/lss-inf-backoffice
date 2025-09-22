@@ -57,8 +57,14 @@ const update = (id: string, params?: TQueryParams) => ({
     },
 });
 
-const acceptance = (id: string, params?: TQueryParams) => ({
-    mutationFn: async (data: TAcceptanceAssistenLab) => {
+const acceptance = (params?: TQueryParams) => ({
+    mutationFn: async ({
+        id,
+        data,
+    }: {
+        id: string;
+        data: TAcceptanceAssistenLab;
+    }) => {
         try {
             const response = await api_service.acceptance(id, data);
 
@@ -66,13 +72,6 @@ const acceptance = (id: string, params?: TQueryParams) => ({
         } catch (error) {
             throw getError(error);
         }
-    },
-    meta: {
-        messages: {
-            success: "Berhasil menerima/menolak pendaftaran asisten lab!",
-            error: "Gagal menerima/menolak pendaftaran asisten lab!",
-        },
-        invalidatesQuery: QUERY_KEY({ id, ...params }),
     },
 });
 

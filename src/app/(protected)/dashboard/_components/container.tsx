@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useHomeRoute } from "@/hooks/use-home-route";
 import { service } from "@/services";
 import { TMeeting } from "@/types/data";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { useQuery } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 
 const ListJadwal = ({ data }: { data: TMeeting }) => {
     return (
@@ -55,6 +57,14 @@ const ListJadwal = ({ data }: { data: TMeeting }) => {
 
 export default function Container() {
     const { data, isLoading } = useQuery(service.jadwal.today());
+
+    const { homeRoute, isLoading: isLoadingHomeRoute } = useHomeRoute();
+
+    if (!isLoadingHomeRoute && homeRoute !== "/dashboard") {
+        setTimeout(() => {
+            redirect(homeRoute);
+        }, 1000);
+    }
 
     return (
         <div className="space-y-4">
