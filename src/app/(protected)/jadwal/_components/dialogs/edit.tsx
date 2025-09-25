@@ -9,8 +9,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import FormSection from "../form";
 import { TJadwalRequest, schema } from "@/services/jadwal/type";
 import { jadwalToValues } from "@/services/jadwal/dto";
-import { useQueryBuilder } from "@/hooks/use-query-builder";
 import { toast } from "sonner";
+import DialogOverride from "./override";
+import { useRef, useState } from "react";
+import { TErrorOverride } from "@/types/data";
 
 interface IDialogEditProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -18,8 +20,10 @@ interface IDialogEditProps {
 }
 
 export default function DialogEdit(props: IDialogEditProps) {
-    const { params } = useQueryBuilder();
     const queryClient = useQueryClient();
+
+    const dialogOverrideRef = useRef<IModalRef>(null);
+    const [errorStatus, setErrorStatus] = useState<TErrorOverride[]>([]);
 
     const { data, isLoading } = useQuery({
         ...service.jadwal.getOne(props.id),
@@ -29,6 +33,7 @@ export default function DialogEdit(props: IDialogEditProps) {
     const onClose = () => {
         props.dialogRef.current?.close();
         form.reset();
+        setErrorStatus([]);
     };
 
     const updateFn = useMutation(service.jadwal.update(props.id));
@@ -42,51 +47,79 @@ export default function DialogEdit(props: IDialogEditProps) {
         },
     });
 
-    const onSubmit = form.handleSubmit((data) => {
-        updateFn.mutate(data, {
-            onSuccess: () => {
-                onClose();
-                queryClient.invalidateQueries({
-                    queryKey: ["jadwal", props.id, params],
+    const onSubmit = (data: TJadwalRequest, isOverride: boolean = false) => {
+        const requestBody = {
+            ...data,
+            isOverride: isOverride,
+        };
+
+        updateFn.mutate(requestBody, {
+            onSuccess: (res) => {
+                queryClient.refetchQueries({
+                    queryKey: ["jadwal"],
                 });
+                toast.success(res.message);
+                onClose();
             },
-            onError: (error) => {
-                toast.error(error.message);
+            onError: (error: any) => {
+                if (error?.status) {
+                    dialogOverrideRef.current?.open();
+                    setErrorStatus([...errorStatus, error]);
+                } else {
+                    toast.error(error.message);
+                }
             },
         });
-    });
+    };
 
     return (
-        <Modal ref={props.dialogRef} title="Edit Jadwal">
-            <Form {...form}>
-                <form className="space-y-4" onSubmit={onSubmit}>
-                    {isLoading ? (
-                        Array.from({ length: 2 }).map((_, index) => (
-                            <Skeleton className="h-10 w-full" key={index} />
-                        ))
-                    ) : (
-                        <FormSection />
-                    )}
+        <>
+            <Modal ref={props.dialogRef} title="Edit Jadwal">
+                <Form {...form}>
+                    <form
+                        className="space-y-4"
+                        onSubmit={(e) => {
+                            e.preventDefault();
 
-                    <div className="flex items-center gap-2 justify-end">
-                        <Button
-                            variant={"outline"}
-                            type="button"
-                            onClick={onClose}
-                            disabled={updateFn.isPending}
-                        >
-                            Batal
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={updateFn.isPending}
-                            loading={updateFn.isPending}
-                        >
-                            Simpan
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-        </Modal>
+                            form.handleSubmit((value) => onSubmit(value))();
+                        }}
+                    >
+                        {isLoading ? (
+                            Array.from({ length: 2 }).map((_, index) => (
+                                <Skeleton className="h-10 w-full" key={index} />
+                            ))
+                        ) : (
+                            <FormSection />
+                        )}
+
+                        <div className="flex items-center gap-2 justify-end">
+                            <Button
+                                variant={"outline"}
+                                type="button"
+                                onClick={onClose}
+                                disabled={updateFn.isPending}
+                            >
+                                Batal
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={updateFn.isPending}
+                                loading={updateFn.isPending}
+                            >
+                                Simpan
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </Modal>
+
+            <DialogOverride
+                dialogOverrideRef={dialogOverrideRef}
+                onOverride={() =>
+                    form.handleSubmit((value) => onSubmit(value, true))()
+                }
+                message={errorStatus}
+            />
+        </>
     );
 }

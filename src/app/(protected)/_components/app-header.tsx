@@ -121,7 +121,7 @@ export default function AppHeader() {
                                                 variant="secondary"
                                                 className="w-fit"
                                             >
-                                                {user?.userLevel.name}
+                                                {user?.userLevel?.name}
                                             </Badge>
                                         </div>
                                     </DropdownMenuLabel>

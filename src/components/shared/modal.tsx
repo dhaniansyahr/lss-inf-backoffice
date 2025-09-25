@@ -40,9 +40,7 @@ const Modal = forwardRef<IModalRef, IModalProps>((props, ref) => {
                 className={cn("w-full max-w-3xl", props.contentClassName)}
             >
                 <DialogHeader>
-                    <DialogTitle id={props.title ?? "title"}>
-                        {props.title}
-                    </DialogTitle>
+                    <DialogTitle>{props.title}</DialogTitle>
                 </DialogHeader>
                 <Separator />
                 {props.children}

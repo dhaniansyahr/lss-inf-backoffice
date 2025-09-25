@@ -78,7 +78,6 @@ export default function LoginForm() {
                                             <FormControl>
                                                 <Input
                                                     className="h-12"
-                                                    type="email"
                                                     {...field}
                                                 />
                                             </FormControl>

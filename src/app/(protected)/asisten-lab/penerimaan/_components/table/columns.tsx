@@ -37,61 +37,66 @@ export const createColumns = ({
         accessorKey: "nama",
         header: "Nama",
         cell: ({ row }) => {
+            return <div>{row.original.mahasiswa.nama ?? "-"}</div>;
+        },
+        isCenter: true,
+    },
+    {
+        accessorKey: "npm",
+        header: "NPM",
+        cell: ({ row }) => {
+            return <div>{row.original.mahasiswa.npm ?? "-"}</div>;
+        },
+        isCenter: true,
+    },
+    {
+        accessorKey: "matakuliah.kode",
+        header: "Kode Matakuliah",
+        cell: ({ row }) => {
+            return <div>{row.original.matakuliah.kode ?? "-"}</div>;
+        },
+    },
+    {
+        accessorKey: "matakuliah.nama",
+        header: "Nama Matakuliah",
+        cell: ({ row }) => {
+            return <div>{row.original.matakuliah.nama ?? "-"}</div>;
+        },
+    },
+    {
+        accessorKey: "kelas",
+        header: "Kelas",
+        isCenter: true,
+        cell: ({ row }) => {
+            return <div>{row.original.jadwal.kelas ?? "-"}</div>;
+        },
+    },
+    {
+        accessorKey: "shift",
+        header: "Waktu",
+        cell: ({ row }) => {
             return (
                 <div>
-                    {row.original.mahasiswaId ?? "-"} -{" "}
-                    {/* {row.original.mahasiswa.nama ?? "-"} -{" "}
-                    {row.original.mahasiswa.npm ?? "-"} */}
+                    {row.original.jadwal.shift.startTime ?? "-"} -{" "}
+                    {row.original.jadwal.shift.endTime ?? "-"}
                 </div>
             );
         },
         isCenter: true,
     },
-    // {
-    //     accessorKey: "matakuliah.nama",
-    //     header: "Matakuliah",
-    //     cell: ({ row }) => {
-    //         return (
-    //             <div>
-    //                 {row.original.matakuliah.kode ?? "-"} -{" "}
-    //                 {row.original.matakuliah.nama ?? "-"}
-    //             </div>
-    //         );
-    //     },
-    // },
-    // {
-    //     accessorKey: "kelas",
-    //     header: "Kelas",
-    //     isCenter: true,
-    //     cell: ({ row }) => {
-    //         return <div>{row.original.jadwal.kelas ?? "-"}</div>;
-    //     },
-    // },
-    // {
-    //     accessorKey: "shift",
-    //     header: "Waktu",
-    //     cell: ({ row }) => {
-    //         return (
-    //             <div>
-    //                 {row.original.jadwal.shift.startTime ?? "-"} -{" "}
-    //                 {row.original.jadwal.shift.endTime ?? "-"}
-    //             </div>
-    //         );
-    //     },
-    //     isCenter: true,
-    // },
-    // {
-    //     accessorKey: "jadwal.ruangan.nama",
-    //     header: "Ruangan",
-    //     cell: ({ row }) => {
-    //         return <div>{row.original.jadwal.ruangan.nama ?? "-"}</div>;
-    //     },
-    //     isCenter: true,
-    // },
+    {
+        accessorKey: "jadwal.ruangan.nama",
+        header: "Ruangan",
+        cell: ({ row }) => {
+            return <div>{row.original.jadwal.ruangan.nama ?? "-"}</div>;
+        },
+        isCenter: true,
+    },
     {
         id: "actions",
         header: "Aksi",
         isCenter: true,
+        size: 200,
         cell: ({ row }) => {
             const isDisabled = row.original.status !== "PENDING";
 
@@ -119,6 +124,5 @@ export const createColumns = ({
                 )
             );
         },
-        size: 50,
     },
 ];

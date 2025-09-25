@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { service } from "@/services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TMeetingRequest, schema } from "@/services/jadwal/type";
 import { useQueryBuilder } from "@/hooks/use-query-builder";
 import SingleDatePicker from "@/components/shared/date-picker/single";
 import SelectBase from "@/components/shared/select-base";
-import { options } from "@/constants/options";
+import { DateTime } from "luxon";
 
 interface IDialogEditPertemuanProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -33,6 +33,11 @@ export default function DialogEditPertemuan(props: IDialogEditPertemuanProps) {
     };
 
     const updateFn = useMutation(service.jadwal.updateMeeting(props.id));
+
+    const { data: meeting, isLoading: isLoadingMeeting } = useQuery({
+        ...service.jadwal.getListMeeting(props.id),
+        enabled: !!props.id,
+    });
 
     const form = useForm<TMeetingRequest>({
         resolver: zodResolver(schema.meeting),
@@ -56,13 +61,57 @@ export default function DialogEditPertemuan(props: IDialogEditPertemuanProps) {
         });
     });
 
-    // const { data: meeting } = useQuery()
+    const meetingOptions =
+        meeting && meeting.content?.length && meeting.content.length > 0
+            ? meeting?.content?.map((item) => ({
+                  value: item.id,
+                  label: `Pertemuan ${item.pertemuan} - ${DateTime.fromFormat(
+                      item.tanggal,
+                      "yyyy-MM-dd"
+                  )
+                      .setLocale("id")
+                      .toFormat("dd MMMM yyyy")}`,
+              }))
+            : [];
 
     return (
         <Modal ref={props.dialogRef} title="Edit Pertemuan">
             <Form {...form}>
                 <form className="space-y-4" onSubmit={onSubmit}>
                     <div className="space-y-2">
+                        <FormField
+                            name="meetingId"
+                            control={form.control}
+                            render={({ field, fieldState: { error } }) => (
+                                <FormItem>
+                                    <FormLabel>Pertemuan</FormLabel>
+                                    <FormControl>
+                                        <SelectBase
+                                            {...field}
+                                            placeholder="Pilih Pertemuan"
+                                            isSearchable
+                                            isLoading={isLoadingMeeting}
+                                            options={meetingOptions}
+                                            fullWith
+                                            value={meetingOptions.find(
+                                                (item) =>
+                                                    item.value === field.value
+                                            )}
+                                            onChange={(value) => {
+                                                field.onChange(value?.value);
+                                            }}
+                                            isClearable
+                                        />
+                                    </FormControl>
+                                    {error && (
+                                        <FormMessage className="text-red-500">
+                                            {error.message}
+                                        </FormMessage>
+                                    )}
+                                </FormItem>
+                            )}
+                        />
+
                         <FormField
                             name="tanggal"
                             control={form.control}
@@ -79,41 +128,14 @@ export default function DialogEditPertemuan(props: IDialogEditPertemuanProps) {
                                             mode="single"
                                             placeholder="Pilih Tanggal"
                                             onSelect={(date) => {
-                                                field.onChange(date);
+                                                const formattedDate =
+                                                    date &&
+                                                    DateTime.fromJSDate(date)
+                                                        .setLocale("id")
+                                                        .toFormat("yyyy-MM-dd");
+                                                field.onChange(formattedDate);
                                             }}
                                             buttonClassName="h-10 rounded-md"
-                                        />
-                                    </FormControl>
-                                    {error && (
-                                        <FormMessage className="text-red-500">
-                                            {error.message}
-                                        </FormMessage>
-                                    )}
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            name="meetingId"
-                            control={form.control}
-                            render={({ field, fieldState: { error } }) => (
-                                <FormItem>
-                                    <FormLabel>Pertemuan</FormLabel>
-                                    <FormControl>
-                                        <SelectBase
-                                            {...field}
-                                            placeholder="Pilih Pertemuan"
-                                            isSearchable
-                                            options={options.HARI}
-                                            fullWith
-                                            value={options.HARI.find(
-                                                (item) =>
-                                                    item.value === field.value
-                                            )}
-                                            onChange={(value) => {
-                                                field.onChange(value?.value);
-                                            }}
-                                            isClearable
                                         />
                                     </FormControl>
                                     {error && (

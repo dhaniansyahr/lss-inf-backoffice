@@ -15,7 +15,11 @@ export default function Container() {
 
     const { id }: { id: string } = useParams();
 
-    const { data, isLoading } = useQuery(service.jadwal.getOne(id));
+    const { data, isLoading } = useQuery({
+        ...service.jadwal.getOne(id),
+        enabled: !!id,
+        refetchOnWindowFocus: true,
+    });
 
     const onBack = () => router.back();
 
@@ -31,6 +35,24 @@ export default function Container() {
             <Card>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
+                        {data?.content?.overrideData &&
+                            data?.content?.overrideData.length > 0 && (
+                                <div className="p-2 bg-destructive/20 rounded-md">
+                                    <ul className="list-disc list-inside">
+                                        {data?.content?.overrideData.map(
+                                            (item) => (
+                                                <li
+                                                    key={item.id}
+                                                    className="font-normal text-destructive text-sm"
+                                                >
+                                                    {item.message}
+                                                </li>
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+
                         <div className="p-2 bg-gray-200 rounded-md">
                             <h1 className="text-lg font-semibold">
                                 Data Jadwal

@@ -91,9 +91,9 @@ const create = () => ({
 });
 
 const update = (params?: TQueryParams) => ({
-    mutationFn: async (data: TAclRequest) => {
+    mutationFn: async ({ id, data }: { id: string; data: TAclRequest }) => {
         try {
-            const response = await service.update(data);
+            const response = await service.update(id, data);
 
             return response.data;
         } catch (error) {

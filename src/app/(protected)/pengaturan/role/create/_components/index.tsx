@@ -24,11 +24,10 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { service } from "@/services";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
-import { schema, TAclRequest } from "@/services/pengguna/role/type";
+import { TAclRequest } from "@/services/pengguna/role/type";
 import { useQueryBuilder } from "@/hooks/use-query-builder";
 import { formatEnumToTitleCase } from "@/utils/string.utils";
 import { toast } from "sonner";
@@ -38,11 +37,14 @@ export default function Container() {
 
     const router = useRouter();
 
+    const [enabledFeatures, setEnabledFeatures] = useState<
+        Record<string, boolean>
+    >({});
+
     const form = useForm<TAclRequest>({
-        resolver: zodResolver(schema),
         defaultValues: {
-            roleName: "",
-            permissions: [],
+            name: "",
+            enabledFeatures: {},
         },
     });
 
@@ -51,58 +53,43 @@ export default function Container() {
     // Fetch all features
     const { data, isLoading } = useQuery(service.roles.getAllFeatures(params));
 
-    const onSubmit = form.handleSubmit((data: TAclRequest) => {
-        createFn.mutate(data, {
-            onSuccess: (res) => {
-                toast.success(res.message);
-                router.back();
-            },
-            onError: (error) => {
+    const onChangeCheck = (subFeature: string, action: string) => {
+        const key = `${subFeature}.${action}`;
+
+        setEnabledFeatures((prev) => {
+            const newFeatures = { ...prev };
+            if (newFeatures[key]) {
+                delete newFeatures[key];
+            } else {
+                newFeatures[key] = true;
+            }
+            return newFeatures;
+        });
+    };
+
+    const isChecked = (subFeature: string, action: string) => {
+        const key = `${subFeature}.${action}`;
+        return enabledFeatures[key] || false;
+    };
+
+    const onSubmit = form.handleSubmit(async (formValues) => {
+        const requestBody = {
+            name: formValues.name,
+            enabledFeatures: enabledFeatures,
+        };
+
+        createFn.mutate(requestBody, {
+            onError(error) {
                 toast.error(error.message);
+            },
+            onSuccess(res) {
+                toast.success(res.message);
+                setTimeout(() => {
+                    onBack();
+                }, 1000);
             },
         });
     });
-
-    const handleCheckboxChange = (
-        featureName: string,
-        actionName: string,
-        checked: boolean
-    ) => {
-        const currentPermissions = form.getValues("permissions") || [];
-        const featureIndex = currentPermissions.findIndex(
-            (p) => p.subject === featureName
-        );
-
-        if (checked) {
-            if (featureIndex === -1) {
-                // Add new feature with this action
-                currentPermissions.push({
-                    subject: featureName,
-                    action: [actionName],
-                });
-            } else {
-                // Add action to existing feature if not already present
-                const feature = currentPermissions[featureIndex];
-                if (!feature.action.includes(actionName)) {
-                    feature.action.push(actionName);
-                }
-            }
-        } else {
-            if (featureIndex !== -1) {
-                const feature = currentPermissions[featureIndex];
-                feature.action = feature.action.filter(
-                    (action) => action !== actionName
-                );
-
-                // Remove feature if no actions left
-                if (feature.action.length === 0) {
-                    currentPermissions.splice(featureIndex, 1);
-                }
-            }
-        }
-
-        form.setValue("permissions", currentPermissions);
-    };
 
     const onBack = () => router.back();
 
@@ -125,7 +112,7 @@ export default function Container() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="roleName"
+                                    name="name"
                                     render={({
                                         field,
                                         fieldState: { error },
@@ -220,19 +207,20 @@ export default function Container() {
                                                                                         >
                                                                                             <Checkbox
                                                                                                 id={`${feature.name}-${action.name}`}
-                                                                                                onCheckedChange={(
-                                                                                                    checked
-                                                                                                ) =>
-                                                                                                    handleCheckboxChange(
+                                                                                                onCheckedChange={() =>
+                                                                                                    onChangeCheck(
                                                                                                         feature.name,
-                                                                                                        action.name,
-                                                                                                        checked as boolean
+                                                                                                        action.name
                                                                                                     )
                                                                                                 }
+                                                                                                checked={isChecked(
+                                                                                                    feature.name,
+                                                                                                    action.name
+                                                                                                )}
                                                                                             />
                                                                                             <Label
                                                                                                 htmlFor={`${feature.name}-${action.name}`}
-                                                                                                className="text-sm font-normal cursor-pointer"
+                                                                                                className="text-sm cursor-pointer"
                                                                                             >
                                                                                                 {formatEnumToTitleCase(
                                                                                                     action.name

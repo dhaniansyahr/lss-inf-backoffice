@@ -23,8 +23,10 @@ export type TUserLevels = {
 };
 
 export type TAssignAccess = {
-    featureName: string;
-    actions: string[];
+    name: string;
+    enabledFeatures: {
+        [key: string]: boolean;
+    };
 };
 
 export type TFeatures = {
@@ -360,4 +362,10 @@ export type TAccess = {
         UPDATE_MEETING: boolean;
         ACCEPTED: boolean;
     };
+};
+
+export type TErrorOverride = {
+    id: string;
+    jadwalId: string;
+    message: string;
 };

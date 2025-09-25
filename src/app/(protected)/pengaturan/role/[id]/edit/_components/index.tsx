@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Table,
     TableBody,
@@ -24,14 +23,14 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { service } from "@/services";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useParams, useRouter } from "next/navigation";
-import { schema, TAclRequest } from "@/services/pengguna/role/type";
+import { TAclRequest } from "@/services/pengguna/role/type";
 import { useQueryBuilder } from "@/hooks/use-query-builder";
 import { formatEnumToTitleCase } from "@/utils/string.utils";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 export default function Container() {
     const { id }: { id: string } = useParams();
@@ -45,112 +44,87 @@ export default function Container() {
     // Fetch all features
     const { data, isLoading } = useQuery(service.roles.getAllFeatures(params));
 
-    const { data: assignedAcess, isLoading: isLoadingAssignedAcess } = useQuery(
-        service.roles.getAccessByUserLevelId(id)
-    );
-    const { data: roleData, isLoading: isLoadingRole } = useQuery(
-        service.roles.getOneRole(id)
-    );
+    const {
+        data: assignedAcess,
+        isLoading: isLoadingAssignedAcess,
+        refetch,
+    } = useQuery(service.roles.getAccessByUserLevelId(id));
 
-    const permissions = Array.from(
-        new Map(
-            (assignedAcess?.content ?? []).map((item) => [
-                item.featureName,
-                {
-                    subject: item.featureName,
-                    action: item.actions,
-                },
-            ])
-        ).values()
-    );
+    const [enabledFeatures, setEnabledFeatures] = useState<
+        Record<string, boolean>
+    >({});
 
     const form = useForm<TAclRequest>({
-        resolver: zodResolver(schema),
         defaultValues: {
-            roleName: roleData?.content?.name ?? "",
-            permissions: permissions,
+            name: assignedAcess?.content?.name ?? "",
+            enabledFeatures: assignedAcess?.content?.enabledFeatures ?? {},
         },
         values: {
-            roleName: roleData?.content?.name ?? "",
-            permissions: permissions,
+            name: assignedAcess?.content?.name ?? "",
+            enabledFeatures: assignedAcess?.content?.enabledFeatures ?? {},
         },
         resetOptions: {
             keepDirty: true,
         },
     });
 
-    const onSubmit = form.handleSubmit((data: TAclRequest) => {
-        updateFn.mutate(data, {
-            onSuccess: (res) => {
-                toast.success(res.message);
-                router.back();
-            },
-            onError: (error) => {
-                toast.error(error.message);
-            },
-        });
+    const onSubmit = form.handleSubmit(async (values) => {
+        const requestBody = {
+            name: values.name,
+            enabledFeatures: enabledFeatures,
+        };
+
+        updateFn.mutate(
+            { id, data: requestBody },
+            {
+                onSuccess: (res) => {
+                    toast.success(res.message);
+
+                    setTimeout(() => {
+                        router.back();
+                    }, 1000);
+                },
+                onError: (error) => {
+                    toast.error(error.message);
+                },
+            }
+        );
     });
 
-    // Helper function to check if an action is selected for a feature
-    const isActionSelected = (
-        featureName: string,
-        actionName: string
-    ): boolean => {
-        const currentPermissions = form.getValues("permissions") || [];
-        const feature = currentPermissions.find(
-            (p) => p.subject === featureName
-        );
-        return feature ? feature.action.includes(actionName) : false;
-    };
+    const onChangeCheck = (subFeature: string, action: string) => {
+        const key = `${subFeature}.${action}`;
 
-    // Helper function to handle checkbox changes
-    const handleCheckboxChange = (
-        featureName: string,
-        actionName: string,
-        checked: boolean
-    ) => {
-        const currentPermissions = form.getValues("permissions") || [];
-        const featureIndex = currentPermissions.findIndex(
-            (p) => p.subject === featureName
-        );
-
-        if (checked) {
-            if (featureIndex === -1) {
-                // Add new feature with this action
-                currentPermissions.push({
-                    subject: featureName,
-                    action: [actionName],
-                });
+        setEnabledFeatures((prev) => {
+            const newFeatures = { ...prev };
+            if (newFeatures[key]) {
+                newFeatures[key] = false;
             } else {
-                // Add action to existing feature if not already present
-                const feature = currentPermissions[featureIndex];
-                if (!feature.action.includes(actionName)) {
-                    feature.action.push(actionName);
-                }
+                newFeatures[key] = true;
             }
-        } else {
-            if (featureIndex !== -1) {
-                const feature = currentPermissions[featureIndex];
-                feature.action = feature.action.filter(
-                    (action) => action !== actionName
-                );
-
-                // Remove feature if no actions left
-                if (feature.action.length === 0) {
-                    currentPermissions.splice(featureIndex, 1);
-                }
-            }
-        }
-
-        form.setValue("permissions", currentPermissions, {
-            shouldDirty: true,
-            shouldValidate: true,
+            return newFeatures;
         });
     };
+
+    const isChecked = (subFeature: string, action: string) => {
+        const key = `${subFeature}.${action}`;
+        return enabledFeatures[key] || false;
+    };
+
+    useEffect(() => {
+        if (assignedAcess?.content) {
+            setEnabledFeatures(assignedAcess.content.enabledFeatures);
+        }
+    }, [assignedAcess?.content]);
+
+    useEffect(() => {
+        if (id) {
+            refetch();
+        }
+    }, [id]);
 
     const onBack = () => router.back();
 
-    const isLoadingTable = isLoading || isLoadingAssignedAcess || isLoadingRole;
+    const isLoadingTable = isLoading || isLoadingAssignedAcess;
 
     return (
         <div className="space-y-6">
@@ -171,7 +145,7 @@ export default function Container() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="roleName"
+                                    name="name"
                                     render={({
                                         field,
                                         fieldState: { error },
@@ -258,47 +232,32 @@ export default function Container() {
                                                                                         action
                                                                                     ) => (
                                                                                         <div
-                                                                                            key={`${feature.name}-${action.name}`}
+                                                                                            key={
+                                                                                                action.name
+                                                                                            }
                                                                                             className="flex items-center gap-2 flex-wrap"
                                                                                         >
-                                                                                            <FormField
-                                                                                                control={
-                                                                                                    form.control
+                                                                                            <Checkbox
+                                                                                                id={`${feature.name}-${action.name}`}
+                                                                                                onCheckedChange={() =>
+                                                                                                    onChangeCheck(
+                                                                                                        feature.name,
+                                                                                                        action.name
+                                                                                                    )
                                                                                                 }
-                                                                                                name="permissions"
-                                                                                                render={({
-                                                                                                    field,
-                                                                                                }) => (
-                                                                                                    <FormItem className="flex items-center gap-2">
-                                                                                                        <FormControl>
-                                                                                                            <Checkbox
-                                                                                                                checked={isActionSelected(
-                                                                                                                    feature.name,
-                                                                                                                    action.name
-                                                                                                                )}
-                                                                                                                id={`${feature.name}-${action.name}`}
-                                                                                                                onCheckedChange={(
-                                                                                                                    checked
-                                                                                                                ) =>
-                                                                                                                    handleCheckboxChange(
-                                                                                                                        feature.name,
-                                                                                                                        action.name,
-                                                                                                                        checked as boolean
-                                                                                                                    )
-                                                                                                                }
-                                                                                                            />
-                                                                                                        </FormControl>
-                                                                                                        <FormLabel
-                                                                                                            htmlFor={`${feature.name}-${action.name}`}
-                                                                                                            className="text-sm font-normal cursor-pointer"
-                                                                                                        >
-                                                                                                            {formatEnumToTitleCase(
-                                                                                                                action.name
-                                                                                                            )}
-                                                                                                        </FormLabel>
-                                                                                                    </FormItem>
+                                                                                                checked={isChecked(
+                                                                                                    feature.name,
+                                                                                                    action.name
                                                                                                 )}
                                                                                             />
+                                                                                            <Label
+                                                                                                htmlFor={`${feature.name}-${action.name}`}
+                                                                                                className="text-sm cursor-pointer"
+                                                                                            >
+                                                                                                {formatEnumToTitleCase(
+                                                                                                    action.name
+                                                                                                )}
+                                                                                            </Label>
                                                                                         </div>
                                                                                     )
                                                                                 )}

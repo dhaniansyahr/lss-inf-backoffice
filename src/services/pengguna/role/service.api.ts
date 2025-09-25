@@ -23,13 +23,13 @@ export const service = {
         return api.get<TResponse<TAllFeatures[]>>(`/acl/features`);
     },
     getAccessByUserLevelId: (userLevelId: string) => {
-        return api.get<TResponse<TAssignAccess[]>>(`/acl/${userLevelId}`);
+        return api.get<TResponse<TAssignAccess>>(`/acl/${userLevelId}`);
     },
     create: (data: TAclRequest) => {
         return api.post<TResponse<TUserLevels>>("/acl", data);
     },
-    update: (data: TAclRequest) => {
-        return api.put<TResponse<TUserLevels>>(`/acl`, data);
+    update: (id: string, data: TAclRequest) => {
+        return api.put<TResponse<TUserLevels>>(`/acl/${id}`, data);
     },
     getAvailableFeatures: () => {
         return api.get<TResponse<string[]>>(`/acl/available-features`);

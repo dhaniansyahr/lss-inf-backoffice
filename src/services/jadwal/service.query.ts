@@ -20,7 +20,7 @@ const getAll = (params?: TQueryParams) => ({
 });
 
 const getOne = (id: string) => ({
-    queryKey: QUERY_KEY({ id }),
+    queryKey: QUERY_KEY({ type: "detail", id }),
     queryFn: async () => {
         try {
             const response = await api_service.getOne(id);
@@ -32,7 +32,7 @@ const getOne = (id: string) => ({
     },
 });
 
-const create = (params?: TQueryParams) => ({
+const create = () => ({
     mutationFn: async (data: TJadwalRequest) => {
         try {
             const response = await api_service.create(data);
@@ -42,30 +42,17 @@ const create = (params?: TQueryParams) => ({
             throw getError(error);
         }
     },
-    meta: {
-        messages: {
-            success: "Berhasil Membuat Jadwal Baru!",
-            error: "Gagal Membuat Jadwal Baru!",
-        },
-        invalidatesQuery: QUERY_KEY({ ...params }),
-    },
 });
 
 const update = (id: string) => ({
     mutationFn: async (data: TJadwalRequest) => {
         try {
             const response = await api_service.update(id, data);
+
             return response.data;
         } catch (error) {
             throw getError(error);
         }
-    },
-
-    meta: {
-        messages: {
-            success: "Berhasil Memperbarui Jadwal!",
-        },
-        invalidatesQuery: QUERY_KEY({ id }),
     },
 });
 
@@ -155,10 +142,23 @@ const updateMeeting = (id: string) => ({
 });
 
 const getListParticipants = (id: string) => ({
-    queryKey: QUERY_KEY({ id }),
+    queryKey: QUERY_KEY({ type: "list-participants", id }),
     queryFn: async () => {
         try {
             const response = await api_service.getListParticipants(id);
+
+            return response.data;
+        } catch (error) {
+            throw getError(error);
+        }
+    },
+});
+
+const getListMeeting = (id: string) => ({
+    queryKey: QUERY_KEY({ type: "list-meeting", id }),
+    queryFn: async () => {
+        try {
+            const response = await api_service.getListMeeting(id);
 
             return response.data;
         } catch (error) {
@@ -241,6 +241,7 @@ export const jadwal = {
     generate,
     updateMeeting,
     getListParticipants,
+    getListMeeting,
     recordAbsent,
     today,
     manualAssignMhs,

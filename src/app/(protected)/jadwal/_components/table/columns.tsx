@@ -48,7 +48,17 @@ export const createColumns = ({
         accessorKey: "matakuliah.nama",
         header: "Nama",
         cell: ({ row }) => {
-            return <div>{row.original.matakuliah.nama ?? "-"}</div>;
+            return (
+                <div
+                    className={
+                        row.original.isOverride
+                            ? "text-destructive font-bold"
+                            : ""
+                    }
+                >
+                    {row.original.matakuliah.nama ?? "-"}
+                </div>
+            );
         },
     },
     {
@@ -166,16 +176,6 @@ export const createColumns = ({
                             >
                                 <Icon icon="mdi:account-plus" />
                                 <span>Assign Praktikan</span>
-                            </DropdownMenuItem>
-                        )}
-
-                        {access?.ASSIGN_ASISTEN_LAB && (
-                            <DropdownMenuItem
-                                className="inline-flex items-center gap-2"
-                                onClick={() => onEditPertemuan(row.original.id)}
-                            >
-                                <Icon icon="mdi:account-multiple" />
-                                <span>Assign Asisten</span>
                             </DropdownMenuItem>
                         )}
                     </DropdownMenuGroup>

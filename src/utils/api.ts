@@ -40,13 +40,20 @@ export const setToken = (token: string) => {
 export const getError = (error: AxiosError | unknown) => {
     if (_axios.isAxiosError(error)) {
         return {
-            content: error.response?.data?.content || null,
+            content: error.response?.data?.content || error.response?.status,
             message: error.response?.data?.message || "Something went wrong",
             errors: error.response?.data?.errors || [],
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            originalError: error,
         };
     }
 
-    return { message: "Something went wrong" };
+    return {
+        message: "Something went wrong",
+        status: null,
+        originalError: error,
+    };
 };
 
 export const getParams = (params: TPaginationRequest) => {

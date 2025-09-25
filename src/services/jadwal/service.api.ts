@@ -48,6 +48,9 @@ export const api_service = {
     getListParticipants: (id: string) => {
         return api.get<TResponse<TListParticipants>>(`/absensi/${id}/list`);
     },
+    getListMeeting: (id: string) => {
+        return api.get<TResponse<TMeeting[]>>(`/jadwal/${id}/list-meeting`);
+    },
     recordAbsent: (data: TAbsentRequest) => {
         return api.post<TResponse<TMeeting>>(`/absensi/record`, data);
     },
