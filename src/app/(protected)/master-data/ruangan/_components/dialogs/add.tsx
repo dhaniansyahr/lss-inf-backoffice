@@ -7,15 +7,15 @@ import FormShift from "../form";
 import { service } from "@/services";
 import { TRuanganRequest, schema } from "@/services/master-data/ruangan/type";
 import { ruanganToValues } from "@/services/master-data/ruangan/dto";
-import { useMutation } from "@tanstack/react-query";
-import { useQueryBuilder } from "@/hooks/use-query-builder";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface IDialogAddProps {
     dialogRef: React.RefObject<IModalRef | null>;
 }
 
 export default function DialogAdd(props: IDialogAddProps) {
-    const { params } = useQueryBuilder();
+    const queryClient = useQueryClient();
 
     const onClose = () => {
         props.dialogRef.current?.close();
@@ -27,11 +27,20 @@ export default function DialogAdd(props: IDialogAddProps) {
         resolver: zodResolver(schema),
     });
 
-    const createFn = useMutation(service.ruangan.create(params));
+    const createFn = useMutation(service.ruangan.create());
 
     const onSubmit = form.handleSubmit((data) => {
         createFn.mutate(data, {
-            onSuccess: () => onClose(),
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["ruangan"],
+                });
+                onClose();
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
         });
     });
 

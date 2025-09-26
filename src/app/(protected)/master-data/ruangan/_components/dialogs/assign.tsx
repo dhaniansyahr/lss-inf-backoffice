@@ -10,15 +10,15 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { service } from "@/services";
-import { useQueryBuilder } from "@/hooks/use-query-builder";
 import {
     TAssignRequest,
     assignSchema,
 } from "@/services/master-data/ruangan/type";
 import SelectBase from "@/components/shared/select-base";
 import { Option } from "@/types/common";
+import { toast } from "sonner";
 
 interface IDialogAssignProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -26,7 +26,7 @@ interface IDialogAssignProps {
 }
 
 export default function DialogAssign(props: IDialogAssignProps) {
-    const { params } = useQueryBuilder();
+    const queryClient = useQueryClient();
 
     const { data } = useQuery({
         ...service.ruangan.getOne(props.id),
@@ -45,17 +45,7 @@ export default function DialogAssign(props: IDialogAssignProps) {
         form.reset();
     };
 
-    const createFn = useMutation({
-        ...service.ruangan.assign(),
-        meta: {
-            messages: {
-                success: "Berhasil Assign Kepala Lab!",
-                error: "Gagal Assign Kepala Lab!",
-            },
-            invalidatesQuery: ["ruangan", params],
-            onDialogClose: onClose,
-        },
-    });
+    const createFn = useMutation(service.ruangan.assign());
 
     const form = useForm<TAssignRequest>({
         resolver: zodResolver(assignSchema),
@@ -71,11 +61,19 @@ export default function DialogAssign(props: IDialogAssignProps) {
     });
 
     const onSubmit = form.handleSubmit((data) => {
-        console.log("Data : ", data);
         createFn.mutate(
             { id: props.id, data },
             {
-                onSuccess: () => onClose(),
+                onSuccess: (res) => {
+                    toast.success(res.message);
+                    queryClient.refetchQueries({
+                        queryKey: ["ruangan"],
+                    });
+                    onClose();
+                },
+                onError: (err) => {
+                    toast.error(err.message);
+                },
             }
         );
     });
@@ -84,8 +82,6 @@ export default function DialogAssign(props: IDialogAssignProps) {
         label: `${item.nama} - ${item.nip}`,
         value: item.id,
     })) as Option[];
-
-    console.log("Form Error : ", form.formState.errors);
 
     return (
         <Modal ref={props.dialogRef} title="Assign Kepala Lab">

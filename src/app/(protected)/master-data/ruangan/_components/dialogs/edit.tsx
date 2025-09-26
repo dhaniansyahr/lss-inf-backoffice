@@ -8,8 +8,8 @@ import { service } from "@/services";
 import { Skeleton } from "@/components/ui/skeleton";
 import { schema, TRuanganRequest } from "@/services/master-data/ruangan/type";
 import { ruanganToValues } from "@/services/master-data/ruangan/dto";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useQueryBuilder } from "@/hooks/use-query-builder";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface IDialogEditProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -17,7 +17,7 @@ interface IDialogEditProps {
 }
 
 export default function DialogEdit(props: IDialogEditProps) {
-    const { params } = useQueryBuilder();
+    const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
         ...service.ruangan.getOne(props.id),
@@ -29,7 +29,7 @@ export default function DialogEdit(props: IDialogEditProps) {
         form.reset();
     };
 
-    const updateFn = useMutation(service.ruangan.update(props.id, params));
+    const updateFn = useMutation(service.ruangan.update(props.id));
 
     const form = useForm<TRuanganRequest>({
         resolver: zodResolver(schema),
@@ -42,7 +42,16 @@ export default function DialogEdit(props: IDialogEditProps) {
 
     const onSubmit = form.handleSubmit((data) => {
         updateFn.mutate(data, {
-            onSuccess: () => onClose(),
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["ruangan"],
+                });
+                onClose();
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
         });
     });
 
