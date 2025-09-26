@@ -9,19 +9,26 @@ import { useQuery } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import { useParams, useRouter } from "next/navigation";
 import TableListMahasiswa from "./table";
+import { useEffect } from "react";
 
 export default function Container() {
     const router = useRouter();
 
     const { id }: { id: string } = useParams();
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, refetch } = useQuery({
         ...service.jadwal.getOne(id),
         enabled: !!id,
         refetchOnWindowFocus: true,
     });
 
     const onBack = () => router.back();
+
+    useEffect(() => {
+        if (id) {
+            refetch();
+        }
+    }, [id]);
 
     return (
         <div className="space-y-4">

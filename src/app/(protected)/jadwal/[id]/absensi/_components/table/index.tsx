@@ -7,13 +7,14 @@ import { service } from "@/services";
 import { useParams } from "next/navigation";
 import { TAbsentRequest } from "@/services/jadwal/type";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function TableAbsensi() {
     const queryClient = useQueryClient();
 
     const { id }: { id: string } = useParams();
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, refetch } = useQuery({
         ...service.jadwal.getListParticipants(id),
         enabled: !!id,
     });
@@ -36,6 +37,12 @@ export default function TableAbsensi() {
         currentPage: 1,
         pageSize: 10,
     });
+
+    useEffect(() => {
+        if (id) {
+            refetch();
+        }
+    }, [id]);
 
     return (
         <DataTable

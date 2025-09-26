@@ -51,7 +51,7 @@ const DialogJadwal = (props: IDialogsProps) => {
         openDialogOptionsCreate: () => {
             dialogOptionsCreateRef.current?.open();
         },
-        openDialogDelete: () => {
+        openDialogDelete: (id) => {
             dialogDeleteRef.current?.open();
             setId(id);
         },
@@ -94,8 +94,12 @@ const DialogJadwal = (props: IDialogsProps) => {
 
     const onGenerate = () => {
         generateFn.mutate(undefined, {
-            onSuccess: () => {
+            onSuccess: (res) => {
+                toast.success(res.message);
                 dialogOptionsCreateRef.current?.close();
+            },
+            onError: (err) => {
+                toast.error(err.message);
             },
         });
     };
