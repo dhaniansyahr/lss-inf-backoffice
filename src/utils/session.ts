@@ -1,7 +1,7 @@
 "use server";
 
 import { sessionCookieKey } from "@/constants/session";
-import { TLoginResponse, TVerifyResponse } from "@/services/auth/types";
+import { TLoginResponse } from "@/services/auth/types";
 import { cookies } from "next/headers";
 
 export async function getSession() {

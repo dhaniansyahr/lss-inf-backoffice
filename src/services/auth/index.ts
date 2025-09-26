@@ -1,5 +1,5 @@
 import type { TResponse } from "@/types/response";
-import { api, apiBase, apiDefault, getError } from "@/utils/api";
+import { api, apiBase, getError } from "@/utils/api";
 import type {
     TLoginRequest,
     TLoginResponse,
@@ -7,6 +7,9 @@ import type {
     TVerifyResponse,
 } from "./types";
 import { routes } from "./api-route";
+import axios from "axios";
+
+const HOST_URL = process.env.NEXT_PUBLIC_FE_URL;
 
 const login = () => ({
     mutationFn: async (data: TLoginRequest) => {
@@ -44,7 +47,7 @@ const verifyToken = async (data: TVerifyRequest) => {
 
 const logout = async () => {
     try {
-        const response = await apiDefault.get("/api/logout");
+        const response = await axios.get(`${HOST_URL}/api/logout`);
 
         return response.data;
     } catch (error) {

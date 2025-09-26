@@ -48,7 +48,7 @@ export default function DialogAdd(props: IDialogAddProps) {
         <Modal ref={props.dialogRef} title="Tambah Pengguna Baru">
             <Form {...form}>
                 <form className="space-y-4" onSubmit={onSubmit}>
-                    <FormSection />
+                    <FormSection isEdit={false} />
 
                     <div className="flex items-center gap-2 justify-end">
                         <Button

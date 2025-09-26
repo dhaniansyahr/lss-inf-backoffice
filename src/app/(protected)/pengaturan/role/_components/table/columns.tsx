@@ -61,7 +61,7 @@ export const createColumns = ({
                             </DropdownMenuItem>
                         )}
 
-                        {access?.DELETE && (
+                        {/* {access?.DELETE && (
                             <DropdownMenuItem
                                 className="inline-flex items-center gap-2"
                                 onClick={() => onDelete(row.original.id)}
@@ -69,7 +69,7 @@ export const createColumns = ({
                                 <Icon icon="mdi:trash" />
                                 <span>Hapus</span>
                             </DropdownMenuItem>
-                        )}
+                        )} */}
                     </DropdownMenuGroup>
                 </ActionMenu>
             );

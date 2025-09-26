@@ -31,8 +31,11 @@ import { TAclRequest } from "@/services/pengguna/role/type";
 import { useQueryBuilder } from "@/hooks/use-query-builder";
 import { formatEnumToTitleCase } from "@/utils/string.utils";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Container() {
+    const queryClient = useQueryClient();
+
     const { params } = useQueryBuilder();
 
     const router = useRouter();
@@ -84,6 +87,9 @@ export default function Container() {
             },
             onSuccess(res) {
                 toast.success(res.message);
+                queryClient.invalidateQueries({
+                    queryKey: ["roles"],
+                });
                 setTimeout(() => {
                     onBack();
                 }, 1000);

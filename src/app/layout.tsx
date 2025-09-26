@@ -3,6 +3,7 @@ import { TConfig } from "@/stores/config";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 
 const fontGeistSans = Geist({
     variable: "--font-geist-sans",
@@ -54,7 +55,20 @@ export default async function RootLayout({
             <body
                 className={`${fontGeistSans.variable} ${fontGeistMono.variable} font-geist-sans antialiased`}
             >
-                <Providers config={config as TConfig}>{children}</Providers>
+                <Providers config={config as TConfig}>
+                    <NextTopLoader
+                        color="#050c43"
+                        initialPosition={0.08}
+                        crawlSpeed={200}
+                        height={3}
+                        crawl={true}
+                        showSpinner={false}
+                        easing="ease"
+                        speed={200}
+                        shadow="0 0 10px #050c43,0 0 5px #050c43"
+                    />
+                    {children}
+                </Providers>
             </body>
         </html>
     );

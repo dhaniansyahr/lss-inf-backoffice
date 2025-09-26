@@ -14,12 +14,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/stores/auth";
-import { service } from "@/services";
 import { usePathname, useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useHomeRoute } from "@/hooks/use-home-route";
+import { deleteSession } from "@/utils/session";
 
 export default function AppHeader() {
     const router = useRouter();
@@ -38,10 +37,8 @@ export default function AppHeader() {
             .slice(0, 2);
     };
 
-    const onLogout = useMutation({
-        mutationKey: ["authLogout"],
-        mutationFn: service.auth.logout,
-        onSuccess: () => {
+    const onLogout = () => {
+        deleteSession().then(() => {
             toast.success("Successfully logged out");
             setIsLogin(false);
             setAccessToken("");
@@ -49,11 +46,24 @@ export default function AppHeader() {
             setTimeout(() => {
                 router.push("/login");
             }, 500);
-        },
-        onError: (error) => {
-            console.error("Logout failed:", error);
-        },
-    });
+        });
+    };
+    // const onLogout = useMutation({
+    //     mutationKey: ["authLogout"],
+    //     mutationFn: service.auth.logout,
+    //     onSuccess: () => {
+    //         toast.success("Successfully logged out");
+    //         setIsLogin(false);
+    //         setAccessToken("");
+
+    //         setTimeout(() => {
+    //             router.push("/login");
+    //         }, 500);
+    //     },
+    //     onError: (error) => {
+    //         console.error("Logout failed:", error);
+    //     },
+    // });
 
     const identity = user?.npm || user?.nip || user?.email;
     const name = user?.nama || user?.fullName;
@@ -128,7 +138,7 @@ export default function AppHeader() {
 
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        onClick={() => onLogout.mutate()}
+                                        onClick={() => onLogout()}
                                         className="text-red-600 focus:text-red-600"
                                     >
                                         <LogOut className="mr-2 h-4 w-4 text-red-500" />

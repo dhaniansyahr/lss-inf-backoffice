@@ -33,7 +33,7 @@ const DialogPengguna = (props: IDialogsProps) => {
             dialogEditRef.current?.open();
             setId(id);
         },
-        openDialogDelete: () => {
+        openDialogDelete: (id) => {
             dialogDeleteRef.current?.open();
             setId(id);
         },
