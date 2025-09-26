@@ -6,10 +6,11 @@ import { schema, TShiftRequest } from "@/services/master-data/shift/type";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import FormShift from "../form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { service } from "@/services";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTime } from "@/utils/string.utils";
+import { DateTime } from "luxon";
+import { toast } from "sonner";
 
 interface IDialogEditProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -17,6 +18,8 @@ interface IDialogEditProps {
 }
 
 export default function DialogEdit(props: IDialogEditProps) {
+    const queryClient = useQueryClient();
+
     const { data, isLoading } = useQuery({
         ...service.shift.getOne(props.id),
         enabled: !!props.id,
@@ -27,17 +30,7 @@ export default function DialogEdit(props: IDialogEditProps) {
         form.reset();
     };
 
-    const updateFn = useMutation({
-        ...service.shift.update(props.id),
-        meta: {
-            messages: {
-                success: "Berhasil Memperbarui Shift!",
-                error: "Gagal Memperbarui Shift!",
-            },
-            invalidatesQuery: [props.id, "shifts"],
-            onDialogClose: onClose,
-        },
-    });
+    const updateFn = useMutation(service.shift.update(props.id));
 
     const form = useForm<TShiftRequest>({
         resolver: zodResolver(schema),
@@ -50,11 +43,22 @@ export default function DialogEdit(props: IDialogEditProps) {
 
     const onSubmit = form.handleSubmit((data) => {
         const body = Object.assign({}, data, {
-            startTime: formatTime(data.startTime, "."),
-            endTime: formatTime(data.endTime, "."),
+            startTime: DateTime.fromISO(data.startTime).toFormat("HH.mm"),
+            endTime: DateTime.fromISO(data.endTime).toFormat("HH.mm"),
         });
 
-        updateFn.mutate(body);
+        updateFn.mutate(body, {
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["shifts"],
+                });
+                onClose();
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
+        });
     });
 
     return (

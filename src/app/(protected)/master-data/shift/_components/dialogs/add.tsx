@@ -6,31 +6,24 @@ import { schema, TShiftRequest } from "@/services/master-data/shift/type";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import FormShift from "../form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { service } from "@/services";
-import { formatTime } from "@/utils/string.utils";
+import { toast } from "sonner";
+import { DateTime } from "luxon";
 
 interface IDialogAddProps {
     dialogRef: React.RefObject<IModalRef | null>;
 }
 
 export default function DialogAdd(props: IDialogAddProps) {
+    const queryClient = useQueryClient();
+
     const onClose = () => {
         props.dialogRef.current?.close();
         form.reset();
     };
 
-    const createFn = useMutation({
-        ...service.shift.create(),
-        meta: {
-            messages: {
-                success: "Berhasil Membuat Shift Baru!",
-                error: "Gagal Membuat Shift Baru!",
-            },
-            invalidatesQuery: ["shifts"],
-            onDialogClose: onClose,
-        },
-    });
+    const createFn = useMutation(service.shift.create());
 
     const form = useForm<TShiftRequest>({
         defaultValues: dataToRequest(null),
@@ -38,12 +31,25 @@ export default function DialogAdd(props: IDialogAddProps) {
     });
 
     const onSubmit = form.handleSubmit((data) => {
+        console.log(data);
+
         const body = Object.assign({}, data, {
-            startTime: formatTime(data.startTime, "."),
-            endTime: formatTime(data.endTime, "."),
+            startTime: DateTime.fromISO(data.startTime).toFormat("HH.mm"),
+            endTime: DateTime.fromISO(data.endTime).toFormat("HH.mm"),
         });
 
-        createFn.mutate(body);
+        createFn.mutate(body, {
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["shifts"],
+                });
+                onClose();
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
+        });
     });
 
     return (
