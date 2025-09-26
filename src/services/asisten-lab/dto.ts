@@ -10,6 +10,5 @@ export function jadwalToValues(
         nilaiTeori: data?.nilaiTeori ?? "",
         nilaiPraktikum: data?.nilaiPraktikum ?? "",
         nilaiAkhir: data?.nilaiAkhir ?? "",
-        keterangan: data?.keterangan ?? "",
     };
 }

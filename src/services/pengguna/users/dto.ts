@@ -1,11 +1,11 @@
-import { formatTime } from "@/utils/string.utils";
-import { TShift, TShiftRequest } from "./type";
+import { TUser } from "@/types/data";
+import { TUserRequest } from "./type";
 
-export function dataToRequest(data: TShift | null): TShiftRequest {
+export function userToRequest(data: TUser | null): TUserRequest {
     return {
-        id: data?.id ?? "",
-        startTime: formatTime(data?.startTime ?? ""),
-        endTime: formatTime(data?.endTime ?? ""),
-        isActive: data?.isActive ?? true,
+        fullName: data?.fullName ?? "",
+        email: data?.email ?? "",
+        password: data?.password ?? "",
+        userLevelId: data?.userLevelId ?? "",
     };
 }

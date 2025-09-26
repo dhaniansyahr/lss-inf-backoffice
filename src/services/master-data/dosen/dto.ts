@@ -8,6 +8,5 @@ export function dosenToValues(data: TDosen | null): TDosenRequest {
         password: data?.password ?? "",
         nip: data?.nip ?? "",
         bidangMinat: data?.bidangMinat ?? "",
-        userLevelId: data?.userLevelId ?? "",
     };
 }

@@ -39,7 +39,6 @@ export default function DialogEdit(props: IDialogEditProps) {
             nilaiTeori: props.values?.nilaiTeori ?? "",
             nilaiPraktikum: props.values?.nilaiPraktikum ?? "",
             nilaiAkhir: props.values?.nilaiAkhir ?? "",
-            keterangan: props.values?.keterangan ?? "",
         },
         values: {
             mahasiswaId: props.values?.mahasiswaId ?? "",
@@ -47,7 +46,6 @@ export default function DialogEdit(props: IDialogEditProps) {
             nilaiTeori: props.values?.nilaiTeori ?? "",
             nilaiPraktikum: props.values?.nilaiPraktikum ?? "",
             nilaiAkhir: props.values?.nilaiAkhir ?? "",
-            keterangan: props.values?.keterangan ?? "",
         },
         resetOptions: {
             keepDirty: true,
