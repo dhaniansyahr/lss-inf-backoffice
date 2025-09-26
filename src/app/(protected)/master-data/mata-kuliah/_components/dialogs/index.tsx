@@ -6,7 +6,8 @@ import DialogAdd from "./add";
 import DialogEdit from "./edit";
 import DialogOptionsCreate from "@/components/shared/options-create-dialog";
 import DialogConfirmation from "@/components/shared/confirmation-dialog";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export interface IDialogsRef {
     openDialogAdd: () => void;
@@ -20,6 +21,8 @@ export interface IDialogsProps {
 }
 
 const DialogMatakuliah = (props: IDialogsProps) => {
+    const queryClient = useQueryClient();
+
     const [id, setId] = useState<string>("");
 
     const dialogAddRef = useRef<IModalRef>(null);
@@ -34,7 +37,7 @@ const DialogMatakuliah = (props: IDialogsProps) => {
             setId(id);
         },
         openDialogOptionsCreate: () => dialogOptionsCreateRef.current?.open(),
-        openDialogDelete: () => {
+        openDialogDelete: (id) => {
             dialogDeleteRef.current?.open();
             setId(id);
         },
@@ -44,8 +47,15 @@ const DialogMatakuliah = (props: IDialogsProps) => {
 
     const onDelete = async () => {
         deleteFn.mutate(id, {
-            onSuccess: () => {
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["matakuliah"],
+                });
                 dialogDeleteRef.current?.close();
+            },
+            onError: (res) => {
+                toast.error(res.message);
             },
         });
     };
@@ -62,8 +72,15 @@ const DialogMatakuliah = (props: IDialogsProps) => {
                 bulkUploadFn.mutate(
                     { file: file },
                     {
-                        onSuccess: () => {
+                        onSuccess: (res) => {
+                            toast.success(res.message);
+                            queryClient.refetchQueries({
+                                queryKey: ["matakuliah"],
+                            });
                             dialogOptionsCreateRef.current?.close();
+                        },
+                        onError: (res) => {
+                            toast.error(res.message);
                         },
                     }
                 );

@@ -36,7 +36,7 @@ const DialogDosen = (props: IDialogsProps) => {
             setId(id);
         },
         openDialogOptionsCreate: () => dialogOptionsCreateRef.current?.open(),
-        openDialogDelete: () => {
+        openDialogDelete: (id) => {
             dialogDeleteRef.current?.open();
             setId(id);
         },
@@ -57,7 +57,12 @@ const DialogDosen = (props: IDialogsProps) => {
         });
     };
 
-    const bulkUploadFn = useMutation(service.dosen.bulkUpload());
+    const bulkUploadFn = useMutation({
+        ...service.dosen.bulkUpload(),
+        meta: {
+            invalidatesQuery: ["dosen", params],
+        },
+    });
 
     const onBulkUpload = () => {
         const inputElement = document.createElement("input");

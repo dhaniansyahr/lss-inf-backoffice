@@ -4,21 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { service } from "@/services";
-import { useMutation } from "@tanstack/react-query";
-import { useQueryBuilder } from "@/hooks/use-query-builder";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import FormSection from "../form";
 import {
     schema,
     TMatakuliahRequest,
 } from "@/services/master-data/matakuliah/type";
 import { matakuliahToValues } from "@/services/master-data/matakuliah/dto";
+import { toast } from "sonner";
 
 interface IDialogAddProps {
     dialogRef: React.RefObject<IModalRef | null>;
 }
 
 export default function DialogAdd(props: IDialogAddProps) {
-    const { params } = useQueryBuilder();
+    const queryClient = useQueryClient();
 
     const onClose = () => {
         props.dialogRef.current?.close();
@@ -30,7 +30,7 @@ export default function DialogAdd(props: IDialogAddProps) {
         resolver: zodResolver(schema),
     });
 
-    const createFn = useMutation(service.matakuliah.create(params));
+    const createFn = useMutation(service.matakuliah.create());
 
     const onSubmit = form.handleSubmit((data) => {
         const body = Object.assign({}, data, {
@@ -38,7 +38,16 @@ export default function DialogAdd(props: IDialogAddProps) {
         });
 
         createFn.mutate(body, {
-            onSuccess: () => onClose(),
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["matakuliah"],
+                });
+                onClose();
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
         });
     });
 

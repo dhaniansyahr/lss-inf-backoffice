@@ -36,7 +36,7 @@ const DialogMahasiswa = (props: IDialogsProps) => {
             setId(id);
         },
         openDialogOptionsCreate: () => dialogOptionsCreateRef.current?.open(),
-        openDialogDelete: () => {
+        openDialogDelete: (id) => {
             dialogDeleteRef.current?.open();
             setId(id);
         },
@@ -45,7 +45,7 @@ const DialogMahasiswa = (props: IDialogsProps) => {
     const deleteFn = useMutation({
         ...service.mahasiswa.remove(),
         meta: {
-            invalidatesQuery: ["dosen", params],
+            invalidatesQuery: ["mahasiswa", params],
         },
     });
 
@@ -57,7 +57,12 @@ const DialogMahasiswa = (props: IDialogsProps) => {
         });
     };
 
-    const bulkUploadFn = useMutation(service.mahasiswa.bulkUpload());
+    const bulkUploadFn = useMutation({
+        ...service.mahasiswa.bulkUpload(),
+        meta: {
+            invalidatesQuery: ["mahasiswa", params],
+        },
+    });
 
     const onBulkUpload = () => {
         const inputElement = document.createElement("input");

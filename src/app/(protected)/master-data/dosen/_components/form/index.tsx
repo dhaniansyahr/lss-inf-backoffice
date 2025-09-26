@@ -1,3 +1,4 @@
+import SelectBase from "@/components/shared/select-base";
 import { Button } from "@/components/ui/button";
 import {
     FormControl,
@@ -13,7 +14,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { options } from "@/constants/options";
 import { TDosenRequest } from "@/services/master-data/dosen/type";
+import { Option } from "@/types/common";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { SelectContent } from "@radix-ui/react-select";
 import { useState } from "react";
@@ -131,28 +134,20 @@ export default function FormSection({ isEdit = false }: { isEdit?: boolean }) {
                     <FormItem>
                         <FormLabel>Bidang Minat</FormLabel>
                         <FormControl>
-                            <Select
-                                value={field.value}
-                                onValueChange={(value) =>
-                                    BIDANG_MINAT_OPTIONS.find(
-                                        (option) => option.value === value
-                                    ) && field.onChange(value)
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Pilih bidang minat" />
-                                </SelectTrigger>
-                                <SelectContent className="w-full bg-white">
-                                    {BIDANG_MINAT_OPTIONS.map((option) => (
-                                        <SelectItem
-                                            key={option.value}
-                                            value={option.value}
-                                        >
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SelectBase
+                                {...field}
+                                placeholder="Pilih Bidang Minat"
+                                isSearchable
+                                options={options.BIDANG_MINAT}
+                                fullWith
+                                value={options.BIDANG_MINAT.find(
+                                    (item) => item.value === field.value
+                                )}
+                                onChange={(value) => {
+                                    field.onChange((value as Option)?.value);
+                                }}
+                                isClearable
+                            />
                         </FormControl>
                         {error && (
                             <FormMessage className="text-red-500">
@@ -162,21 +157,6 @@ export default function FormSection({ isEdit = false }: { isEdit?: boolean }) {
                     </FormItem>
                 )}
             />
-
-            {/* <FormField
-        name="userLevelId"
-        control={form.control}
-        render={({ field, fieldState: { error } }) => (
-          <FormItem>
-            <FormControl></FormControl>
-            {error && (
-              <FormMessage className="text-red-500">
-                {error.message}
-              </FormMessage>
-            )}
-          </FormItem>
-        )}
-      /> */}
         </div>
     );
 }

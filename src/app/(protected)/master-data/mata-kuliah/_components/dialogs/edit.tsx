@@ -5,14 +5,14 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { service } from "@/services";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useQueryBuilder } from "@/hooks/use-query-builder";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     TMatakuliahRequest,
     schema,
 } from "@/services/master-data/matakuliah/type";
 import { matakuliahToValues } from "@/services/master-data/matakuliah/dto";
 import FormSection from "../form";
+import { toast } from "sonner";
 
 interface IDialogEditProps {
     dialogRef: React.RefObject<IModalRef | null>;
@@ -20,7 +20,7 @@ interface IDialogEditProps {
 }
 
 export default function DialogEdit(props: IDialogEditProps) {
-    const { params } = useQueryBuilder();
+    const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
         ...service.matakuliah.getOne(props.id),
@@ -32,7 +32,7 @@ export default function DialogEdit(props: IDialogEditProps) {
         form.reset();
     };
 
-    const updateFn = useMutation(service.matakuliah.update(props.id, params));
+    const updateFn = useMutation(service.matakuliah.update(props.id));
 
     const form = useForm<TMatakuliahRequest>({
         resolver: zodResolver(schema),
@@ -45,7 +45,16 @@ export default function DialogEdit(props: IDialogEditProps) {
 
     const onSubmit = form.handleSubmit((data) => {
         updateFn.mutate(data, {
-            onSuccess: () => onClose(),
+            onSuccess: (res) => {
+                toast.success(res.message);
+                queryClient.refetchQueries({
+                    queryKey: ["matakuliah"],
+                });
+                onClose();
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
         });
     });
 
